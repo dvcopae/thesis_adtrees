@@ -32,6 +32,6 @@ ba = BasicAssignment(filepath)
 min_cost_attr.evaluate_bu(T, ba, True)
 
 t = timeit.Timer(lambda: min_cost_attr.evaluate_bu(T, ba, False))
-print("Time: {:.10f} s.".format(t.timeit(100)/100))
+print("Time: {:.5f} ms.".format(t.timeit(100)/100*1000))
 
 
