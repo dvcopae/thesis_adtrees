@@ -24,9 +24,10 @@ def plus_op(x, y):
 
 
 min_cost_attr = AttrDomain(min, plus_op, min, plus_op)
-filepath = 'trees_w_assignments/rfid_large_modified.xml'
+filepath = 'trees_w_assignments/rfid_large_80_modified.xml'
 
 T = ADTree(filepath)
+# print(f'Tree size: {T.subtree_size(T.root)}')
 ba = BasicAssignment(filepath)
 
 min_cost_attr.evaluate_bu(T, ba, True)

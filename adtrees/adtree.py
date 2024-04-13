@@ -160,6 +160,16 @@ class ADTree:
         """
         return self.dict[node]
 
+    def subtree_size(self, node):
+        children = 0
+        unvisited = self.get_children(node)
+        while unvisited:
+            current = unvisited.pop(0)
+            children += 1
+            unvisited.extend(self.get_children(current))
+
+        return children
+
     def is_countered(self, node):
         if self.get_counter(node) is not None:
             return True

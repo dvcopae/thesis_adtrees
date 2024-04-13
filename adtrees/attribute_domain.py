@@ -9,6 +9,7 @@ init(autoreset=True)
 
 
 PRINT_INTERMEDIATE = False
+MAX_PARETO_SIZE = 0
 
 
 def _reduce_pf_points(actor, points):
@@ -82,7 +83,12 @@ class AttrDomain:
 
         PRINT_INTERMEDIATE = print_progress
 
-        return self.__bottomup(T, T.root, ba)
+        bu = self.__bottomup(T, T.root, ba)
+
+        if print_progress:
+            print(f'Max Pareto Front Size: {MAX_PARETO_SIZE}')
+
+        return bu
 
     def __bottomup(self, T, node: ADNode, ba: BasicAssignment, check_countered=True):
         """
@@ -91,6 +97,8 @@ class AttrDomain:
 
         proponent in {'a', 'd'}.
         """
+
+        global MAX_PARETO_SIZE
 
         is_inh_gate = check_countered and T.is_countered(node)
 
@@ -109,6 +117,7 @@ class AttrDomain:
         if PRINT_INTERMEDIATE:
             color = Fore.RED if node.type == 'a' else Fore.GREEN
             print(color + f"{'(INH) ' if is_inh_gate else ''}{node} {pf}")
+            MAX_PARETO_SIZE = max(MAX_PARETO_SIZE, len(pf))
 
         return pf
 
