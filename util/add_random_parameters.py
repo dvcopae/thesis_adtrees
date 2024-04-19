@@ -1,4 +1,5 @@
 import os
+import sys
 import xml.etree.ElementTree as ET
 import random
 from pathlib import Path
@@ -20,7 +21,7 @@ def add_values_to_basic_events(file_path):
             parameter = ET.Element('parameter')
             parameter.set('domainId', 'MinCost1')
             parameter.set('category', 'basic')
-            parameter.text = str(random.randint(1, 1000))
+            parameter.text = str(random.randint(1, int(1e4)))
 
             # Add the new element to the 'node', directly after the 'label' child
             node.insert(1, parameter)
@@ -37,7 +38,8 @@ def add_values_to_basic_events(file_path):
 
     root.append(domain)
 
+    ET.indent(tree, space="  ", level=0)
     tree.write(os.path.join('../trees_w_assignments', Path(file_path).stem + '_modified.xml'))
 
 
-add_values_to_basic_events('../trees/rfid_large_80.xml')
+add_values_to_basic_events(os.path.join('thesis_tree.xml'))

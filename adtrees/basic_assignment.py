@@ -1,5 +1,6 @@
 from util.adtparser import get_basic_assignment_xml
 from adtrees.adtree import ADTree
+from copy import deepcopy
 
 
 def _from_xml(path):
@@ -103,6 +104,11 @@ class BasicAssignment:
         else:
             # initialize with an empty dictionary
             self.map = {}
+
+    def deepcopy(self):
+        new = BasicAssignment()
+        new.map = deepcopy(self.map)
+        return new
 
     def __contains__(self, label):
         """

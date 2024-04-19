@@ -1,0 +1,117 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>OR1</label>
+    <node refinement="conjunctive">
+      <label>a2</label>
+      <node refinement="conjunctive" switchRole="yes">
+        <label>AND1</label>
+        <node refinement="conjunctive">
+          <label>t2GCstNjiC</label>
+          <node refinement="conjunctive">
+            <label>bwbeCFyNPs</label>
+            <node refinement="conjunctive" switchRole="yes">
+              <label>f6aBtER3ES</label>
+              <node refinement="conjunctive">
+                <label>JpXW6lPUxd</label>
+                <node refinement="conjunctive">
+                  <label>KQPWJEIm43</label>
+                  <node refinement="conjunctive" switchRole="yes">
+                    <label>Gkw1SGslmH</label>
+                    <node refinement="conjunctive">
+                      <label>04YQKXbCp8</label>
+                    </node>
+                    <node refinement="conjunctive">
+                      <label>G4YHCm9v39</label>
+                    </node>
+                    <node refinement="conjunctive" switchRole="yes">
+                      <label>jWY9WswVKN</label>
+                    </node>
+                  </node>
+                </node>
+                <node refinement="conjunctive">
+                  <label>Y4aNQZ6oy7</label>
+                </node>
+              </node>
+              <node refinement="conjunctive">
+                <label>tlVVHrcNfH</label>
+              </node>
+              <node refinement="conjunctive" switchRole="yes">
+                <label>ewEtYf6cfA</label>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>9IbOfJHGXl</label>
+          </node>
+        </node>
+        <node refinement="conjunctive">
+          <label>d2</label>
+        </node>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>a1</label>
+        </node>
+      </node>
+    </node>
+    <node refinement="conjunctive">
+      <label>oFopX43atT</label>
+      <node refinement="conjunctive">
+        <label>Xu8RazXexb</label>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>HIYbJqKLtd</label>
+          <node refinement="conjunctive">
+            <label>DyVvS8AR81</label>
+          </node>
+          <node refinement="conjunctive">
+            <label>gQoQhRNWxW</label>
+            <node refinement="conjunctive">
+              <label>1XTZMg1kHe</label>
+              <node refinement="conjunctive" switchRole="yes">
+                <label>yqYbMGbWts</label>
+                <node refinement="conjunctive">
+                  <label>FW4BpI4sd5</label>
+                  <node refinement="conjunctive">
+                    <label>du6OevxQqm</label>
+                    <node refinement="conjunctive" switchRole="yes">
+                      <label>O3PnKrLPek</label>
+                      <node refinement="conjunctive">
+                        <label>P1YVcKwy19</label>
+                      </node>
+                      <node refinement="conjunctive">
+                        <label>rfhMuj2bQn</label>
+                      </node>
+                      <node refinement="conjunctive" switchRole="yes">
+                        <label>VwezghtjH2</label>
+                      </node>
+                    </node>
+                  </node>
+                  <node refinement="conjunctive">
+                    <label>gWs4KCNuwa</label>
+                  </node>
+                </node>
+                <node refinement="conjunctive">
+                  <label>1lTnV54HSB</label>
+                </node>
+                <node refinement="conjunctive" switchRole="yes">
+                  <label>2oRKFC2zP1</label>
+                </node>
+              </node>
+            </node>
+            <node refinement="conjunctive">
+              <label>FrwaWHREfk</label>
+            </node>
+          </node>
+          <node refinement="conjunctive" switchRole="yes">
+            <label>JXItwGK3Mz</label>
+          </node>
+        </node>
+      </node>
+      <node refinement="conjunctive">
+        <label>EZZ1X0UFrz</label>
+      </node>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

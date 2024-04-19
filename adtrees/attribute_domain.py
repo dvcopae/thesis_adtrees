@@ -1,4 +1,4 @@
-import itertools
+from itertools import chain, combinations, permutations
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
@@ -7,9 +7,14 @@ from colorama import Fore, init
 
 init(autoreset=True)
 
-
 PRINT_INTERMEDIATE = False
 MAX_PARETO_SIZE = 0
+
+
+def powerset(iterable):
+    """powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"""
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 def _reduce_pf_points(actor, points):
@@ -59,15 +64,40 @@ class AttrDomain:
     15
     """
 
-    def __init__(self, or_d, and_d, or_a, and_a):
+    def __init__(self, or_d, and_d, or_a, and_a, neutral_d, neutral_a):
         self.or_d = or_d
         self.and_d = and_d
+        self.neutral_d = neutral_d
+        self.neutral_a = neutral_a
         if None in [or_a, and_a]:
             self.or_a = and_d
             self.and_a = or_d
         else:
             self.or_a = or_a
             self.and_a = and_a
+
+    def evaluate_dummy(self, T: ADTree, ba: BasicAssignment, print_progress: True):
+        pts = []
+        all_defenses = T.get_basic_actions('d')
+        all_attacks = T.get_basic_actions('a')
+
+        for active_defs in powerset(all_defenses):
+            new_assignment = BasicAssignment()
+            for a in all_attacks:
+                new_assignment[a] = ba[a]
+
+            # When a defense activate, equate its cost with the neutral element
+            for d in all_defenses:
+                new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
+
+            pts.extend(self.evaluate_bu(T, new_assignment, print_progress=False))
+
+        pf = _reduce_pf_points(T.root.ref, pts)
+
+        if print_progress:
+            print(pf)
+
+        return pf
 
     def evaluate_bu(self, T: ADTree, ba: BasicAssignment, print_progress: True):
         """
@@ -76,6 +106,9 @@ class AttrDomain:
         the bottom-up evaluation.
         """
         global PRINT_INTERMEDIATE
+
+        if not T.is_proper_tree():
+            raise TypeError('T is not a proper tree')
 
         # initial checks; make sure that every basic action is assigned a value
         if missing := [label for label in T.get_basic_actions() if label not in ba]:
@@ -139,7 +172,7 @@ class AttrDomain:
         strategies = []
         def_op, att_op = self._get_combine_operators(node.type, node.ref)
 
-        for (label_i, pf_i), (label_j, pf_j) in itertools.permutations(pf_map.items(), r=2):
+        for (label_i, pf_i), (label_j, pf_j) in permutations(pf_map.items(), r=2):
             strategies.extend((def_op(d_i, d_j), att_op(a_i, a_j)) for d_i, a_i in pf_i for d_j, a_j in pf_j if
                               not visited_map[label_j])
 

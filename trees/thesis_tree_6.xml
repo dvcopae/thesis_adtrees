@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<adtree>
+	<node refinement="conjunctive">
+		<label>OR1</label>
+		<node refinement="conjunctive">
+			<label>a2</label>
+			<node refinement="conjunctive" switchRole="yes">
+				<label>AND1</label>
+				<node refinement="conjunctive">
+					<label>d1</label>
+				</node>
+				<node refinement="conjunctive">
+					<label>d2</label>
+				</node>
+				<node refinement="conjunctive" switchRole="yes">
+					<label>a1</label>
+				</node>
+			</node>
+		</node>
+		<node refinement="conjunctive">
+			<label>a3</label>
+		</node>
+	</node>
+	<domain id="MinCost1">
+		<class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+		<tool>ADTool2</tool>
+	</domain>
+</adtree>

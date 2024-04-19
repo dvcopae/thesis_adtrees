@@ -212,11 +212,11 @@ class ADTree:
             d_role = 'p'
         for b in self.get_basic_actions('a'):
             if self.is_duplicated_label(b, a_role):
-                return True
+                return False
         for b in self.get_basic_actions('d'):
             if self.is_duplicated_label(b, d_role):
-                return True
-        return False
+                return False
+        return True
 
     def is_duplicated_label(self, label, actor='p'):
         """
