@@ -1,5 +1,4 @@
 from util.adtparser import get_basic_assignment_xml
-from adtrees.adtree import ADTree
 from copy import deepcopy
 
 
@@ -74,21 +73,6 @@ class BasicAssignment:
             a .txt file storing a basic assignment.
 
     If no path provided, an empty basic assignment is created, ready to be populated.
-
-    Examples
-    ----------
-    >>> ba = BasicAssignment('filename.xml')
-    >>> ba.output('ba.txt')
-    >>> ba2 = BasicAssignment('ba.txt')
-    >>> ba == ba2
-    True
-
-    >>> T = ADTree('treefile.xml')
-    >>> ba = BasicAssignment()
-    >>> for b in T.basic_actions('d'):
-            ba[b] = 2**30
-    >>> for b in T.basic_actions('a'):
-            ba[b] = 10
     """
 
     def __init__(self, path=None):

@@ -82,26 +82,37 @@ class AttrDomain:
         all_defenses = T.get_basic_actions('d')
         all_attacks = T.get_basic_actions('a')
 
-        for active_defs, active_atts in product(powerset(all_defenses), powerset(all_attacks)):
-            new_assignment = BasicAssignment()
+        for active_defs in powerset(all_defenses):
+            pts_candidates = []
+            def_cost = sum([ba[d] for d in all_defenses if d in active_defs])
 
-            for a in all_attacks:
-                new_assignment[a] = ba[a] if a in active_atts else self.absorb_a
+            for active_atts in powerset(all_attacks):
+                new_assignment = BasicAssignment()
 
-            for d in all_defenses:
-                new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
+                for a in all_attacks:
+                    new_assignment[a] = ba[a] if a in active_atts else self.absorb_a
 
-            bu_result = self.__bottomup(T, T.root, new_assignment)
-            if bu_result != [(0, float('inf'))]:  # successful
-                def_cost = sum([ba[d] for d in all_defenses if d in active_defs])
-                att_cost = sum([ba[a] for a in all_attacks if a in active_atts])
-                pts.append((def_cost, att_cost))
+                for d in all_defenses:
+                    new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
+
+                activation_map = self.get_activation_map(T, new_assignment)
+
+                if T.is_strategy_successful(activation_map):  # successful
+                    att_cost = sum([ba[a] for a in all_attacks if a in active_atts])
+
+                    pts_candidates.append((def_cost, att_cost))
+
+            reduced_candidates = [(def_cost, float('inf'))] if len(pts_candidates) == 0 \
+                else _reduce_pf_points(T.root.ref, pts_candidates)
+
+            if print_progress:
+                print(f'Added for defense {active_defs} : {reduced_candidates}')
+
+            pts.extend(reduced_candidates)
 
         pf = _reduce_pf_points(T.root.ref, pts)
 
-        if print_progress:
-            print(f'(Size {len(pf)})' + str(pf))
-            print()
+        print(f'(Size {len(pf)}): ' + str(pf))
 
         return pf
 
@@ -120,14 +131,17 @@ class AttrDomain:
             for d in all_defenses:
                 new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
 
-            pts.extend(self.__bottomup(T, T.root, new_assignment))
+            bu_result = self.__bottomup(T, T.root, new_assignment)
+            
+            if print_progress:
+                print(f'Added for defense {active_defs} : {bu_result}')
+            pts.extend(bu_result)
 
         pf = _reduce_pf_points(T.root.ref, pts)
 
-        if print_progress:
-            print(f'(Size {len(pf)})' + str(pf))
-            if not T.is_proper_tree():
-                print(Fore.YELLOW + "## WARNING ##: The results are not correct since the tree is a DAG.")
+        print(f'(Size {len(pf)})' + str(pf))
+        if not T.is_proper_tree():
+            print(Fore.YELLOW + "## WARNING ##: The results are not correct since the tree is a DAG.")
 
         return pf
 
@@ -219,3 +233,13 @@ class AttrDomain:
                       for cnt_def, cnt_att in counter_pf]
 
         return _reduce_pf_points(action.type, strategies)
+
+    def get_activation_map(self, T: ADTree, ba: BasicAssignment):
+        activations = {}
+        for d in T.get_basic_actions('d'):
+            activations[d] = False if ba[d] == self.neutral_d else True
+
+        for a in T.get_basic_actions('a'):
+            activations[a] = False if ba[a] == self.absorb_a else True
+
+        return activations

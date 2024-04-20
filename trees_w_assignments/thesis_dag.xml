@@ -1,0 +1,57 @@
+<?xml version='1.0'?>
+<adtree>
+	<node refinement="conjunctive">
+		<label>Steal user data</label>
+		<node refinement="disjunctive">
+			<label>Steal credentials</label>
+			<node refinement="conjunctive">
+				<label>BU</label>
+				<parameter domainId="MinCost1" category="basic">100.0</parameter>
+			</node>
+			<node refinement="conjunctive">
+				<label>PA</label>
+				<parameter domainId="MinCost1" category="basic">15.0</parameter>
+				<node refinement="conjunctive" switchRole="yes">
+					<label>APUT</label>
+					<parameter domainId="MinCost1" category="basic">5.0</parameter>
+				</node>
+			</node>
+			<node refinement="conjunctive">
+				<label>ESV</label>
+				<parameter domainId="MinCost1" category="basic">5.0</parameter>
+				<node refinement="conjunctive" switchRole="yes">
+					<label>SU</label>
+					<parameter domainId="MinCost1" category="basic">10.0</parameter>
+					<node refinement="conjunctive" switchRole="yes">
+						<label>DNS</label>
+						<parameter domainId="MinCost1" category="basic">10.0</parameter>
+					</node>
+				</node>
+			</node>
+			<node refinement="conjunctive">
+				<label>ACV</label>
+				<parameter domainId="MinCost1" category="basic">10.0</parameter>
+				<node refinement="conjunctive" switchRole="yes">
+					<label>SU</label>
+					<parameter domainId="MinCost1" category="basic">10.0</parameter>
+					<node refinement="conjunctive" switchRole="yes">
+						<label>DNS</label>
+						<parameter domainId="MinCost1" category="basic">10.0</parameter>
+					</node>
+				</node>
+			</node>
+		</node>
+		<node refinement="conjunctive">
+			<label>SDK</label>
+			<parameter domainId="MinCost1" category="basic">35.0</parameter>
+			<node refinement="conjunctive" switchRole="yes">
+				<label>SKO</label>
+				<parameter domainId="MinCost1" category="basic">20.0</parameter>
+			</node>
+		</node>
+	</node>
+	<domain id="MinCost1">
+		<class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+		<tool>ADTool2</tool>
+	</domain>
+</adtree>

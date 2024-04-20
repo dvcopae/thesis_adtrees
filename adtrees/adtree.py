@@ -1,4 +1,5 @@
 from adtrees.adnode import ADNode
+from adtrees.basic_assignment import BasicAssignment
 from util.adtparser import file_to_dict
 from copy import deepcopy
 
@@ -246,6 +247,25 @@ class ADTree:
             if counter > 1:
                 return True
         return False
+
+    def is_strategy_successful(self, activation_map: dict):
+        return self.__is_strategy_successful(self.root, activation_map)
+
+    def __is_strategy_successful(self, node: ADNode, activation_map: dict, check_countered=True):
+        is_inh_gate = check_countered and self.is_countered(node)
+
+        if is_inh_gate:
+            counter_node = self.get_counter(node)
+            # we have an INH gate between `node` and `counter_node`
+            return (self.__is_strategy_successful(node, activation_map, check_countered=False)
+                    and not self.__is_strategy_successful(counter_node, activation_map))
+        elif node.ref == '':  # Basic action
+            return activation_map[node.label]
+        else:  # AND / OR nodes
+            children_activations = [self.__is_strategy_successful(child, activation_map)
+                                    for child in self.get_children(node) if self.get_counter(node) != child] 
+
+            return all(children_activations) if node.ref == 'AND' else any(children_activations)
 
     def order(self):
         """
