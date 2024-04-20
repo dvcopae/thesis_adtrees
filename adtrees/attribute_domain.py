@@ -1,4 +1,4 @@
-from itertools import chain, combinations, permutations, product
+from itertools import chain, combinations, product
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
@@ -64,11 +64,11 @@ class AttrDomain:
     15
     """
 
-    def __init__(self, or_d, and_d, or_a, and_a, neutral_d, neutral_a):
+    def __init__(self, or_d, and_d, or_a, and_a, neutral_d, absorb_a):
         self.or_d = or_d
         self.and_d = and_d
         self.neutral_d = neutral_d
-        self.neutral_a = neutral_a
+        self.absorb_a = absorb_a
         if None in [or_a, and_a]:
             self.or_a = and_d
             self.and_a = or_d
@@ -76,7 +76,37 @@ class AttrDomain:
             self.or_a = or_a
             self.and_a = and_a
 
-    def evaluate_dummy(self, T: ADTree, ba: BasicAssignment, print_progress: True):
+    def evaluate_dummiest(self, T: ADTree, ba: BasicAssignment, print_progress: True):
+        """ Exponential in the number of basic events. """
+        pts = []
+        all_defenses = T.get_basic_actions('d')
+        all_attacks = T.get_basic_actions('a')
+
+        for active_defs, active_atts in product(powerset(all_defenses), powerset(all_attacks)):
+            new_assignment = BasicAssignment()
+
+            for a in all_attacks:
+                new_assignment[a] = ba[a] if a in active_atts else self.absorb_a
+
+            for d in all_defenses:
+                new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
+
+            bu_result = self.__bottomup(T, T.root, new_assignment)
+            if bu_result != [(0, float('inf'))]:  # successful
+                def_cost = sum([ba[d] for d in all_defenses if d in active_defs])
+                att_cost = sum([ba[a] for a in all_attacks if a in active_atts])
+                pts.append((def_cost, att_cost))
+
+        pf = _reduce_pf_points(T.root.ref, pts)
+
+        if print_progress:
+            print(f'(Size {len(pf)})' + str(pf))
+            print()
+
+        return pf
+
+    def evaluate_dummy_bu(self, T: ADTree, ba: BasicAssignment, print_progress: True):
+        """ Exponential in the number of basic defense steps. """
         pts = []
         all_defenses = T.get_basic_actions('d')
         all_attacks = T.get_basic_actions('a')
@@ -86,15 +116,9 @@ class AttrDomain:
             for a in all_attacks:
                 new_assignment[a] = ba[a]
 
-            def_sum = 0
-
             # When a defense activate, equate its cost with the neutral element
             for d in all_defenses:
-                if d in active_defs:
-                    new_assignment[d] = ba[d]
-                    def_sum += ba[d]
-                else:
-                    new_assignment[d] = self.neutral_d
+                new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
 
             pts.extend(self.__bottomup(T, T.root, new_assignment))
 
@@ -102,7 +126,8 @@ class AttrDomain:
 
         if print_progress:
             print(f'(Size {len(pf)})' + str(pf))
-            print()
+            if not T.is_proper_tree():
+                print(Fore.YELLOW + "## WARNING ##: The results are not correct since the tree is a DAG.")
 
         return pf
 
@@ -128,7 +153,8 @@ class AttrDomain:
         if print_progress:
             print(f'Pareto Front Size: {len(bu)}')
             print(f'Max P.F. Size: {MAX_PARETO_SIZE}')
-
+            if not T.is_proper_tree():
+                print(Fore.YELLOW + "## WARNING ##: The results are not correct since the tree is a DAG.")
         return bu
 
     def __bottomup(self, T, node: ADNode, ba: BasicAssignment, check_countered=True):
