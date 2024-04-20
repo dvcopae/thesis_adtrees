@@ -5,12 +5,8 @@ from adtrees.attribute_domain import AttrDomain
 from adtrees.basic_assignment import BasicAssignment
 
 
-def plus_op(x, y):
-    return x + y
-
-
-min_cost_attr = AttrDomain(min, plus_op, min, plus_op, 0, 0)
-filepath = 'trees_w_assignments/rfid_reduced_modified.xml'
+min_cost_attr = AttrDomain(min, sum, min, sum, 0, 0)
+filepath = 'trees_w_assignments/rfid_dag_modified.xml'
 T = ADTree(filepath)
 print(f'Tree size: {T.subtree_size()} (defenses: {len(T.get_basic_actions('d'))})')
 print(f'Is tree-like ? {T.is_proper_tree()}')
@@ -28,6 +24,6 @@ def measure_dummy():
     print("Time: {:.5f} ms.".format(t.timeit(1) / 1 * 1000))
 
 
-# measure_dummy()
+measure_dummy()
 
-measure_bu()
+# measure_bu()

@@ -1,0 +1,70 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>Breaking and Entering</label>
+    <node refinement="conjunctive">
+      <label>a_2</label>
+      <parameter domainId="MinCost1" category="basic">4</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>d_1</label>
+        <parameter domainId="MinCost1" category="basic">2</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>a_1</label>
+          <parameter domainId="MinCost1" category="basic">2</parameter>
+        </node>
+      </node>
+    </node>
+    <node refinement="disjunctive">
+        <label>a_4</label>
+        <parameter domainId="MinCost1" category="basic">16</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>d_2</label>
+          <parameter domainId="MinCost1" category="basic">4</parameter>
+          <node refinement="disjunctive" switchRole="yes">
+            <label>a_3</label>
+            <parameter domainId="MinCost1" category="basic">8</parameter>
+          </node>
+        </node>
+      </node>
+    <node refinement="disjunctive">
+      <label>a_6</label>
+      <parameter domainId="MinCost1" category="basic">64</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>d_3</label>
+        <parameter domainId="MinCost1" category="basic">8</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>a_5</label>
+          <parameter domainId="MinCost1" category="basic">32</parameter>
+      </node>
+      </node>
+    </node>
+    <node refinement="disjunctive">
+      <label>a_8</label>
+      <parameter domainId="MinCost1" category="basic">256</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>d_4</label>
+        <parameter domainId="MinCost1" category="basic">16</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>a_7</label>
+          <parameter domainId="MinCost1" category="basic">128</parameter>
+      </node>
+      </node>
+    </node>
+    <node refinement="disjunctive">
+      <label>a_10</label>
+      <parameter domainId="MinCost1" category="basic">1024</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>d_5</label>
+        <parameter domainId="MinCost1" category="basic">32</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>a_9</label>
+          <parameter domainId="MinCost1" category="basic">512</parameter>
+      </node>
+      </node>
+    </node>
+
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

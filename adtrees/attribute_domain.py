@@ -1,4 +1,4 @@
-from itertools import chain, combinations, permutations
+from itertools import chain, combinations, permutations, product
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
@@ -170,21 +170,16 @@ class AttrDomain:
 
     def _process_children(self, T: ADTree, node: ADNode, ba: BasicAssignment):
         pf_map = {}
-        visited_map = {}
 
         for child in T.get_children(node):
             if T.get_counter(node) != child:
                 pf_map[child.label] = self.__bottomup(T, child, ba)
-                visited_map[child.label] = False
 
         strategies = []
         def_op, att_op = self._get_combine_operators(node.type, node.ref)
 
-        for (label_i, pf_i), (label_j, pf_j) in permutations(pf_map.items(), r=2):
-            strategies.extend((def_op(d_i, d_j), att_op(a_i, a_j)) for d_i, a_i in pf_i for d_j, a_j in pf_j if
-                              not visited_map[label_j])
-
-            visited_map[label_i] = True  # Prevent future values from being compared to label_i again
+        for cart_prod in product(*list(pf_map.values())):
+            strategies.append((def_op([p[0] for p in cart_prod]), att_op([p[1] for p in cart_prod])))
 
         return _reduce_pf_points(node.type, strategies)
 
@@ -194,7 +189,7 @@ class AttrDomain:
 
         def_op, att_op = self._get_combine_operators(action.type, 'INH')
 
-        strategies = [(def_op(act_def, cnt_def), att_op(act_att, cnt_att)) for act_def, act_att in action_pf
+        strategies = [(def_op([act_def, cnt_def]), att_op([act_att, cnt_att])) for act_def, act_att in action_pf
                       for cnt_def, cnt_att in counter_pf]
 
         return _reduce_pf_points(action.type, strategies)

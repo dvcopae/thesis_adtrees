@@ -44,4 +44,4 @@ def add_values_to_basic_events(file_path):
     tree.write(os.path.join('../trees_w_assignments', Path(file_path).stem + '_modified.xml'))
 
 
-add_values_to_basic_events(os.path.join('rfid_reduced.xml'))
+add_values_to_basic_events(os.path.join('rfid_dag.xml'))

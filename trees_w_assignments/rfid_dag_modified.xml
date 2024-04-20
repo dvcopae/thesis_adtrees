@@ -1,0 +1,306 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>RFID Dos Attack</label>
+    <node refinement="disjunctive">
+      <label>Remove Tag</label>
+      <node refinement="disjunctive">
+        <label>Remove Tag Self</label>
+        <node refinement="disjunctive">
+          <label>Infiltrate Building</label>
+          <node refinement="conjunctive">
+            <label>Breaking and Entering</label>
+            <node refinement="disjunctive">
+              <label>Get onto Premises</label>
+              <node refinement="disjunctive">
+                <label>Climb over Fence</label>
+                <parameter domainId="MinCost1" category="basic">9900</parameter>
+                <node refinement="disjunctive" switchRole="yes">
+                  <label>Barbed Wire</label>
+                  <parameter domainId="MinCost1" category="basic">51027</parameter>
+                  <node refinement="disjunctive" switchRole="yes">
+                    <label>Guard Aganist Barbs</label>
+                    <node refinement="disjunctive">
+                      <label>Use Carpet on Barbs</label>
+                      <parameter domainId="MinCost1" category="basic">75292</parameter>
+                    </node>
+                    <node refinement="disjunctive">
+                      <label>Wear Protective Clothing</label>
+                      <parameter domainId="MinCost1" category="basic">56975</parameter>
+                    </node>
+                  </node>
+                </node>
+              </node>
+              <node refinement="disjunctive">
+                <label>Enter through Gate</label>
+                <parameter domainId="MinCost1" category="basic">35300</parameter>
+              </node>
+            </node>
+            <node refinement="disjunctive">
+              <label>Get into Warehouse</label>
+              <node refinement="disjunctive">
+                <label>Enter through Door</label>
+                <parameter domainId="MinCost1" category="basic">95887</parameter>
+                <node refinement="disjunctive" switchRole="yes">
+                  <label>Monitor with Biometric Sensors</label>
+                  <parameter domainId="MinCost1" category="basic">78803</parameter>
+                </node>
+              </node>
+              <node refinement="disjunctive">
+                <label>Enter through Loading Dock</label>
+                <parameter domainId="MinCost1" category="basic">17398</parameter>
+              </node>
+            </node>
+            <node refinement="disjunctive" switchRole="yes">
+              <label>Monitor with Security Cameras</label>
+              <parameter domainId="MinCost1" category="basic">80613</parameter>
+              <node refinement="disjunctive" switchRole="yes">
+                <label>Disable Cameras</label>
+                <node refinement="disjunctive">
+                  <label>Laser Cameras</label>
+                  <parameter domainId="MinCost1" category="basic">48030</parameter>
+                </node>
+                <node refinement="disjunctive">
+                  <label>Video Loop Cameras</label>
+                  <parameter domainId="MinCost1" category="basic">70987</parameter>
+                  <node refinement="disjunctive" switchRole="yes">
+                    <label>Employ Guards</label>
+                    <parameter domainId="MinCost1" category="basic">24938</parameter>
+                  </node>
+                </node>
+              </node>
+            </node>
+          </node>
+          <node refinement="disjunctive">
+            <label>Pose as a Truck Driver</label>
+            <parameter domainId="MinCost1" category="basic">57255</parameter>
+          </node>
+          <node refinement="conjunctive">
+            <label>Postal Trojan Attack</label>
+            <node refinement="disjunctive">
+              <label>Hide in a Box</label>
+              <parameter domainId="MinCost1" category="basic">60067</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Be Sent to the Warehouse</label>
+              <parameter domainId="MinCost1" category="basic">50098</parameter>
+              <node refinement="disjunctive" switchRole="yes">
+                <label>Sniffer Dog</label>
+                <parameter domainId="MinCost1" category="basic">398</parameter>
+                <node refinement="disjunctive" switchRole="yes">
+                  <label>Confuse Dog</label>
+                  <node refinement="disjunctive">
+                    <label>Distract Dog with Rats</label>
+                    <parameter domainId="MinCost1" category="basic">50460</parameter>
+                  </node>
+                  <node refinement="disjunctive">
+                    <label>Spray Pepper</label>
+                    <parameter domainId="MinCost1" category="basic">55450</parameter>
+                  </node>
+                </node>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>Visitor Attack</label>
+            <node refinement="disjunctive">
+              <label>Come as Visitor</label>
+              <parameter domainId="MinCost1" category="basic">7454</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Hide in Bathroom</label>
+              <parameter domainId="MinCost1" category="basic">13752</parameter>
+              <node refinement="disjunctive" switchRole="yes">
+                <label>Track Visitors</label>
+                <node refinement="disjunctive">
+                  <label>Escort Visitors</label>
+                  <parameter domainId="MinCost1" category="basic">42182</parameter>
+                </node>
+                <node refinement="disjunctive">
+                  <label>Register in Visitor's Log</label>
+                  <parameter domainId="MinCost1" category="basic">5175</parameter>
+                  <node refinement="disjunctive" switchRole="yes">
+                    <label>Fake Log Entry</label>
+                    <parameter domainId="MinCost1" category="basic">56300</parameter>
+                    <node refinement="disjunctive" switchRole="yes">
+                      <label>Attended Visitor's Log</label>
+                      <parameter domainId="MinCost1" category="basic">26976</parameter>
+                    </node>
+                  </node>
+                </node>
+                <node refinement="disjunctive">
+                  <label>Attend Visitor's Log</label>
+                  <parameter domainId="MinCost1" category="basic">51683</parameter>
+                </node>
+                <node refinement="disjunctive">
+                  <label>Presence Detectors on Premises</label>
+                  <parameter domainId="MinCost1" category="basic">71426</parameter>
+                </node>
+              </node>
+            </node>
+          </node>
+        </node>
+        <node refinement="disjunctive">
+          <label>Infiltrate Organisation</label>
+          <node refinement="disjunctive">
+            <label>Get Hired as Warehouse Staff</label>
+            <parameter domainId="MinCost1" category="basic">4495</parameter>
+          </node>
+          <node refinement="disjunctive">
+            <label>Pose as Warehouse Employee</label>
+            <parameter domainId="MinCost1" category="basic">50145</parameter>
+          </node>
+          <node refinement="disjunctive">
+            <label>Buy the Warehouse</label>
+            <parameter domainId="MinCost1" category="basic">92332</parameter>
+          </node>
+          <node refinement="disjunctive" switchRole="yes">
+            <label>Background Check</label>
+            <parameter domainId="MinCost1" category="basic">56981</parameter>
+          </node>
+        </node>
+      </node>
+      <node refinement="disjunctive">
+        <label>Other Person Removes Tag</label>
+        <node refinement="conjunctive">
+          <label>Bribe</label>
+          <node refinement="disjunctive">
+            <label>Identify Corruptible Subject</label>
+            <parameter domainId="MinCost1" category="basic">62642</parameter>
+          </node>
+          <node refinement="disjunctive">
+            <label>Bribe Subject</label>
+            <parameter domainId="MinCost1" category="basic">19744</parameter>
+          </node>
+          <node refinement="conjunctive" switchRole="yes">
+            <label>Thwart Employees</label>
+            <node refinement="disjunctive">
+              <label>Security Awareness Training</label>
+              <parameter domainId="MinCost1" category="basic">92280</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Threaten to Fire Employees</label>
+              <parameter domainId="MinCost1" category="basic">99321</parameter>
+            </node>
+          </node>
+        </node>
+        <node refinement="disjunctive">
+          <label>Threaten</label>
+          <parameter domainId="MinCost1" category="basic">33592</parameter>
+        </node>
+        <node refinement="disjunctive">
+          <label>Blackmail</label>
+          <parameter domainId="MinCost1" category="basic">62459</parameter>
+        </node>
+        <node refinement="disjunctive">
+          <label>Trick</label>
+          <node refinement="disjunctive">
+            <label>Send False Replacement Tag</label>
+            <parameter domainId="MinCost1" category="basic">15439</parameter>
+            <node refinement="disjunctive" switchRole="yes">
+              <label>Authenticate Tag</label>
+              <parameter domainId="MinCost1" category="basic">94262</parameter>
+              <node refinement="disjunctive" switchRole="yes">
+                <label>Break Authentication</label>
+                <parameter domainId="MinCost1" category="basic">49799</parameter>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>False Management Order</label>
+            <node refinement="disjunctive">
+              <label>Infiltrate Management</label>
+              <parameter domainId="MinCost1" category="basic">27498</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Order Tag Replacement</label>
+              <parameter domainId="MinCost1" category="basic">31142</parameter>
+            </node>
+          </node>
+          <node refinement="disjunctive" switchRole="yes">
+            <label>Security Awareness Training</label>
+            <parameter domainId="MinCost1" category="basic">38316</parameter>
+          </node>
+        </node>
+      </node>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>Attach with Strenger Adhesive</label>
+        <parameter domainId="MinCost1" category="basic">68459</parameter>
+      </node>
+    </node>
+    <node refinement="disjunctive">
+      <label>Disable Tag</label>
+      <parameter domainId="MinCost1" category="basic">72204</parameter>
+    </node>
+    <node refinement="disjunctive">
+      <label>Overload Tag</label>
+      <parameter domainId="MinCost1" category="basic">36251</parameter>
+    </node>
+    <node refinement="disjunctive">
+      <label>Disable Reader</label>
+      <parameter domainId="MinCost1" category="basic">89727</parameter>
+    </node>
+    <node refinement="disjunctive">
+      <label>Disable Backend</label>
+      <parameter domainId="MinCost1" category="basic">4289</parameter>
+    </node>
+    <node refinement="disjunctive">
+      <label>Block Communication</label>
+      <node refinement="disjunctive">
+        <label>Block Tag Reader</label>
+        <node refinement="conjunctive">
+          <label>Shield Tag</label>
+          <node refinement="disjunctive">
+            <label>Be in Vicinity of Tag</label>
+            <parameter domainId="MinCost1" category="basic">22109</parameter>
+            <node refinement="disjunctive" switchRole="yes">
+              <label>Secure Warehouse</label>
+              <parameter domainId="MinCost1" category="basic">18019</parameter>
+            </node>
+          </node>
+          <node refinement="disjunctive">
+            <label>Faraday Cage</label>
+            <node refinement="disjunctive">
+              <label>Cage Around Reader</label>
+              <parameter domainId="MinCost1" category="basic">85479</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Cage Around Tag</label>
+              <parameter domainId="MinCost1" category="basic">34596</parameter>
+            </node>
+          </node>
+        </node>
+        <node refinement="disjunctive">
+          <label>Blocker Reader</label>
+          <parameter domainId="MinCost1" category="basic">20218</parameter>
+        </node>
+        <node refinement="disjunctive">
+          <label>Blocker Tag</label>
+          <parameter domainId="MinCost1" category="basic">30527</parameter>
+        </node>
+        <node refinement="disjunctive">
+          <label>Jam Signal</label>
+          <parameter domainId="MinCost1" category="basic">2776</parameter>
+          <node refinement="disjunctive" switchRole="yes">
+            <label>Isolate Network</label>
+            <node refinement="disjunctive">
+              <label>Secure Warehouse</label>
+              <parameter domainId="MinCost1" category="basic">38529</parameter>
+            </node>
+            <node refinement="disjunctive">
+              <label>Faraday Around Tag and Reader</label>
+              <parameter domainId="MinCost1" category="basic">51997</parameter>
+            </node>
+          </node>
+        </node>
+      </node>
+      <node refinement="disjunctive">
+        <label>Block Reader Backend</label>
+        <parameter domainId="MinCost1" category="basic">53916</parameter>
+      </node>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

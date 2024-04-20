@@ -143,7 +143,7 @@
 					<node refinement="conjunctive" switchRole="yes">
 						<label>Thwart Employees</label>
 						<node refinement="disjunctive">
-							<label>Security Awareness Training v2</label>
+							<label>Security Awareness Training</label>
 						</node>
 						<node refinement="disjunctive">
 							<label>Threaten to Fire Employees</label>
@@ -206,7 +206,7 @@
 					<node refinement="disjunctive">
 						<label>Be in Vicinity of Tag</label>
 						<node refinement="disjunctive" switchRole="yes">
-							<label>Secure Warehouse v2</label>
+							<label>Secure Warehouse</label>
 						</node>
 					</node>
 					<node refinement="disjunctive">
@@ -239,7 +239,7 @@
 				</node>
 			</node>
 			<node refinement="disjunctive">
-				<label>DoS in Network</label>
+				<label>Block Reader Backend</label>
 			</node>
 		</node>
 	</node>
