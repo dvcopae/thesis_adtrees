@@ -1,0 +1,48 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>Breaking and Entering</label>
+    <node refinement="conjunctive">
+      <label>Get onto Premises</label>
+      <parameter domainId="MinCost1" category="basic">92191</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>Barbed Wire</label>
+        <parameter domainId="MinCost1" category="basic">97895</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>N_6</label>
+          <parameter domainId="MinCost1" category="basic">44999</parameter>
+        </node>
+      </node>
+    </node>
+    <node refinement="disjunctive">
+      <label>Get into Warehouse</label>
+      <node refinement="disjunctive">
+        <label>Enter through Door</label>
+        <parameter domainId="MinCost1" category="basic">39407</parameter>
+        <node refinement="disjunctive" switchRole="yes">
+          <label>Monitor with Biometric Sensors</label>
+          <parameter domainId="MinCost1" category="basic">52369</parameter>
+          <node refinement="disjunctive" switchRole="yes">
+            <label>N_5</label>
+            <parameter domainId="MinCost1" category="basic">19283</parameter>
+          </node>
+        </node>
+      </node>
+      <node refinement="disjunctive">
+        <label>Enter through Loading Dock</label>
+        <parameter domainId="MinCost1" category="basic">59182</parameter>
+      </node>
+    </node>
+    <node refinement="disjunctive" switchRole="yes">
+      <label>Monitor with Security Cameras</label>
+      <parameter domainId="MinCost1" category="basic">57786</parameter>
+      <node refinement="disjunctive" switchRole="yes">
+        <label>Disable Cameras</label>
+        <parameter domainId="MinCost1" category="basic">33192</parameter>
+      </node>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

@@ -1,5 +1,6 @@
 from adtrees.adnode import ADNode
 from util.adtparser import file_to_dict
+from copy import deepcopy
 
 
 class ADTree:
@@ -160,13 +161,16 @@ class ADTree:
         """
         return self.dict[node]
 
-    def subtree_size(self, node):
+    def subtree_size(self):
         children = 0
-        unvisited = self.get_children(node)
+
+        new_tree = deepcopy(self)
+
+        unvisited = new_tree.get_children(new_tree.root)
         while unvisited:
             current = unvisited.pop(0)
             children += 1
-            unvisited.extend(self.get_children(current))
+            unvisited.extend(new_tree.get_children(current))
 
         return children
 

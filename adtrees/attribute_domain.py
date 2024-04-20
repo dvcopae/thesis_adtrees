@@ -86,16 +86,23 @@ class AttrDomain:
             for a in all_attacks:
                 new_assignment[a] = ba[a]
 
+            def_sum = 0
+
             # When a defense activate, equate its cost with the neutral element
             for d in all_defenses:
-                new_assignment[d] = ba[d] if d in active_defs else self.neutral_d
+                if d in active_defs:
+                    new_assignment[d] = ba[d]
+                    def_sum += ba[d]
+                else:
+                    new_assignment[d] = self.neutral_d
 
-            pts.extend(self.evaluate_bu(T, new_assignment, print_progress=False))
+            pts.extend(self.__bottomup(T, T.root, new_assignment))
 
         pf = _reduce_pf_points(T.root.ref, pts)
 
         if print_progress:
-            print(pf)
+            print(f'(Size {len(pf)})' + str(pf))
+            print()
 
         return pf
 
@@ -107,8 +114,8 @@ class AttrDomain:
         """
         global PRINT_INTERMEDIATE
 
-        if not T.is_proper_tree():
-            raise TypeError('T is not a proper tree')
+        # if not T.is_proper_tree():
+        #     raise TypeError('T is not a proper tree')
 
         # initial checks; make sure that every basic action is assigned a value
         if missing := [label for label in T.get_basic_actions() if label not in ba]:
@@ -119,7 +126,8 @@ class AttrDomain:
         bu = self.__bottomup(T, T.root, ba)
 
         if print_progress:
-            print(f'Max Pareto Front Size: {MAX_PARETO_SIZE}')
+            print(f'Pareto Front Size: {len(bu)}')
+            print(f'Max P.F. Size: {MAX_PARETO_SIZE}')
 
         return bu
 
@@ -149,7 +157,7 @@ class AttrDomain:
 
         if PRINT_INTERMEDIATE:
             color = Fore.RED if node.type == 'a' else Fore.GREEN
-            print(color + f"{'(INH) ' if is_inh_gate else ''}{node} {pf}")
+            print(color + f"{'(INH) ' if is_inh_gate else ''}{node}, (Size {len(pf)}), {pf}")
             MAX_PARETO_SIZE = max(MAX_PARETO_SIZE, len(pf))
 
         return pf
