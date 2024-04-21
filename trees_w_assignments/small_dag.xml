@@ -3,25 +3,41 @@
 	<node refinement="conjunctive">
 		<label>root</label>
 		<node refinement="disjunctive">
-			<label>[OR_1]</label>
+			<label>OR_1</label>
 			<node refinement="conjunctive">
 				<label>a2</label>
-				<parameter domainId="MinCost1" category="basic">4.0</parameter>
+				<parameter domainId="MinCost1" category="basic">8.0</parameter>
 			</node>
 			<node refinement="conjunctive">
-				<label>a</label>
-				<parameter domainId="MinCost1" category="basic">5.0</parameter>
+				<label>a1</label>
+				<parameter domainId="MinCost1" category="basic">4.0</parameter>
+			</node>
+			<node refinement="disjunctive" switchRole="yes">
+				<label>d1</label>
+				<parameter domainId="MinCost1" category="basic">2.0</parameter>
+				<node refinement="disjunctive" switchRole="yes">
+					<label>a3</label>
+					<parameter domainId="MinCost1" category="basic">16.0</parameter>
+				</node>
 			</node>
 		</node>
 		<node refinement="disjunctive">
-			<label>[OR_2]</label>
+			<label>OR_2</label>
 			<node refinement="conjunctive">
-				<label>a</label>
-				<parameter domainId="MinCost1" category="basic">5.0</parameter>
+				<label>a1</label>
+				<parameter domainId="MinCost1" category="basic">4.0</parameter>
 			</node>
 			<node refinement="conjunctive">
-				<label>a3</label>
+				<label>a4</label>
+				<parameter domainId="MinCost1" category="basic">8.0</parameter>
+			</node>
+			<node refinement="disjunctive" switchRole="yes">
+				<label>d2</label>
 				<parameter domainId="MinCost1" category="basic">4.0</parameter>
+				<node refinement="disjunctive" switchRole="yes">
+					<label>a5</label>
+					<parameter domainId="MinCost1" category="basic">100.0</parameter>
+				</node>
 			</node>
 		</node>
 	</node>
