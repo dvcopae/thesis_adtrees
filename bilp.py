@@ -2,6 +2,9 @@ import itertools
 from gurobipy import Model, GRB, quicksum
 import sys
 from timeit import default_timer as timer
+from colorama import Fore, init
+
+init(autoreset=True)
 
 start = timer()
 results = []
@@ -70,23 +73,23 @@ def get_model_small_dag():
     m.update()  
 
     # Save problem
-    m.write("small_dag.lp")
+    # m.write("small_dag.lp")
     
     return m, defense_cost, attack_cost
 
 def get_model_infty_tree():
     m = Model("bilp")
 
-    x_a1 = m.addVar(vtype=GRB.BINARY)
-    x_a2 = m.addVar(vtype=GRB.BINARY)
+    x_a1 = m.addVar(vtype=GRB.BINARY, name='a1')
+    x_a2 = m.addVar(vtype=GRB.BINARY, name='a2')
 
-    x_d1 = m.addVar(vtype=GRB.BINARY)
-    x_d2 = m.addVar(vtype=GRB.BINARY)
+    x_d1 = m.addVar(vtype=GRB.BINARY, name='d1')
+    x_d2 = m.addVar(vtype=GRB.BINARY, name='d2')
 
-    x_INH_a1_d1 = m.addVar(vtype=GRB.BINARY)
-    x_INH_a2_d2 = m.addVar(vtype=GRB.BINARY)
+    x_INH_a1_d1 = m.addVar(vtype=GRB.BINARY, name='x_INH_a1_d1')
+    x_INH_a2_d2 = m.addVar(vtype=GRB.BINARY, name='x_INH_a2_d2')
 
-    x_OR = m.addVar(vtype=GRB.BINARY) # root
+    x_OR = m.addVar(vtype=GRB.BINARY, name='x_OR') # root
 
     attack_cost = 1*x_a1 + 2*x_a2
     defense_cost = 10*x_d1 + 10*x_d2
@@ -117,7 +120,66 @@ def get_model_infty_tree():
     m.update()  
 
     # Save problem
-    m.write("infty_tree.lp")
+    # m.write("infty_tree.lp")
+    
+    return m, defense_cost, attack_cost
+ 
+def get_model_counter_example_dag():
+    m = Model("bilp")
+
+    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
+    x_a2 = m.addVar(vtype=GRB.BINARY, name="a2")
+    x_a3 = m.addVar(vtype=GRB.BINARY, name="a3")
+
+    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
+    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
+    
+    x_D_OR = m.addVar(vtype=GRB.BINARY, name="x_D_OR")
+
+    x_INH_a2_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_a2_d1")
+    x_INH_a3_d2 = m.addVar(vtype=GRB.BINARY, name="x_INH_a3_d2")
+    x_INH_a1_D_OR = m.addVar(vtype=GRB.BINARY, name="x_INH_a1_D_OR")
+    
+    x_A_OR = m.addVar(vtype=GRB.BINARY, name="x_A_OR") # root
+    
+    attack_cost = 2*x_a2 + 1*x_a1 + 3*x_a3
+    defense_cost = 10*x_d1 + 10*x_d2
+
+    # Minimum damage objective
+    m.setObjectiveN(attack_cost, index=0, priority=0)
+    m.setObjectiveN(defense_cost, index=1, priority=0)
+
+    # root is always reached
+    m.addConstr(x_A_OR == 1)
+
+    # each OR node has as many constraints as children -> without it you get scenarios where child=1 but or=0
+    # and one "upper_bound" to ensure that when all children are false, OR should be false -> without it, you get scenario where all children =0, but or=1
+    m.addConstr(x_D_OR >= x_d1)
+    m.addConstr(x_D_OR >= x_d2)
+    m.addConstr(x_D_OR <= x_d1 + x_d2)
+    
+    m.addConstr(x_A_OR >= x_INH_a2_d1)
+    m.addConstr(x_A_OR >= x_INH_a3_d2)
+    m.addConstr(x_A_OR >= x_INH_a1_D_OR)
+    m.addConstr(x_A_OR <= x_INH_a2_d1 + x_INH_a3_d2 + x_INH_a1_D_OR)
+
+    # INH constraints: INH = attack * (1-counterattack)
+    # and INH is disabled when attack is disabled
+    m.addConstr(x_INH_a1_D_OR == x_a1 * (1 - x_D_OR))
+    m.addConstr(x_INH_a1_D_OR <= x_a1)
+    
+    m.addConstr(x_INH_a2_d1 == x_a2 * (1 - x_d1))
+    m.addConstr(x_INH_a2_d1 <= x_a2)
+
+    m.addConstr(x_INH_a3_d2 == x_a3 * (1 - x_d2))
+    m.addConstr(x_INH_a3_d2 <= x_a3)
+    
+    m.setParam(GRB.Param.OutputFlag, 0) # disable logging
+    
+    m.update()  
+
+    # Save problem
+    # m.write("infty_tree.lp")
     
     return m, defense_cost, attack_cost
   
@@ -135,40 +197,93 @@ def _add_exclusion_constraint(m, x_d, solution):
     # at least one of the auxiliary variables is true
     m.addConstr(quicksum(aux_vars) >= 1, "exclusion")
 
-def no_good_cut_method(m, defense_cost, attack_cost):
-    """
-    DOESN'T WORK WHEN DIFFERENT DEFENSE ACTIVATIONS SHARE THE SAME DEFENSE_SUM
+def _add_min_defense_constraint(m, min_defense_cost):
+    if m.getConstrByName("def_cost_constr"):
+        m.remove(m.getConstrByName("def_cost_constr"))
+    m.addConstr(defense_cost >= min_defense_cost + 1e-5, "def_cost_constr")
     
-    Find PF by iteratively finding a feasible solution, adding a constraint to remove that 
-    solution from the feasible region, and then find the next feasible solution, 
-    until no more solutions are met.
-    """
-    
-    previous_defenses = []
+def _add_min_atack_constraint(m, min_attack_cost):
+    if m.getConstrByName("attack_cost_constr"):
+        m.remove(m.getConstrByName("attack_cost_constr"))
+    m.addConstr(attack_cost >= min_attack_cost + 1e-5, "attack_cost_constr")
+
+def _print_current_solution(m):
+    def_c = defense_cost.getValue()
+    att_c = m.objVal
+    _printif(f'Found solution {def_c, att_c}')
+    _printif(', '.join([f'{v.varName}: {int(abs(v.x))}' for v in m.getVars() if not v.varName.startswith("aux_")]))
+
+def _printif(s):
+    if PRINT_PROGRESS:
+        print(s)
+
+def no_good_cut_method(m, defense_cost):
+    prev_def_vectors = []
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
+    
+    # Keep track of last element
+    last_def_cost = -1
+    last_att_cost = -1
+        
     while True:
         m.optimize()
         if m.status != GRB.OPTIMAL:
-            print("No more feasible solutions.")
-            break
-
-        current_defense = [int(var.x) for var in x_d]
-        
-        # Check if the solution is new
-        if current_defense not in previous_defenses:
-            previous_defenses.append(current_defense)
-            current_defense_cost = defense_cost if isinstance(defense_cost, float) else defense_cost.getValue()
-            current_attack_cost = m.objVal
-
-            # Add exclusion for the current solution
-            _add_exclusion_constraint(m, x_d, current_defense)
+            # Since we are adding the previous solutions instead of the current ones, the last one won't be added. Add it now.
+            sol = (last_def_cost, last_att_cost)
+            if sol not in results:
+                _printif(Fore.GREEN + f'Added solution {sol}')
+                results.append(sol)
             
-            results.append((current_defense_cost, current_attack_cost))
+            # Add the next possible output of the function `defense_cost` and infty to the results
+            x_def_coeffs = [defense_cost.getCoeff(i) for i in range(defense_cost.size())]
+                        
+            for combination in itertools.product([0, 1], repeat=len(x_def_coeffs)):
+                def_cost_output = sum(c * x for c, x in zip(x_def_coeffs, combination))
+                if def_cost_output > last_def_cost:
+                    sol = (def_cost_output, float('inf'))
+                    _printif(Fore.GREEN + f'Added solution {sol}')
+                    results.append(sol)
+                    break
+            
+            _printif("No more feasible solutions.")
+            break
+        
+        current_defense_cost = defense_cost.getValue()
+        current_attack_cost = m.objVal
+        
+        def_vec = [int(var.x) for var in x_d]
+
+        # Check if the solution is new
+        if def_vec not in prev_def_vectors:
+            _print_current_solution(m)
+            
+            # Add exclusion for the current solution
+            prev_def_vectors.append(def_vec)
+            _add_exclusion_constraint(m, x_d, def_vec)
+            
+            sol = None
+            
+            if last_def_cost > -1 and current_defense_cost > last_def_cost:
+                sol = (last_def_cost, last_att_cost)
+                _add_min_defense_constraint(m, last_def_cost)
+                _add_min_atack_constraint(m, current_attack_cost)
+
+            elif current_defense_cost == last_def_cost:
+                # we encountered a case where different defense vectors reach the same solution
+                sol = (current_defense_cost, current_attack_cost)
+                _add_min_defense_constraint(m, current_defense_cost)
+                _add_min_atack_constraint(m, current_attack_cost)
+               
+            if sol:
+                _printif(Fore.GREEN + f'Added solution {sol}')
+                results.append(sol)           
+            
+            last_def_cost, last_att_cost = current_defense_cost, current_attack_cost
         else:
-            print("Duplicate solution found, terminating...")
+            _printif("Duplicate solution found, terminating...")
             break
 
-    return previous_defenses
+    return prev_def_vectors
 
 def epsilon_constraint_method(m, defense_cost, attack_cost):
     """Find PF by placing repeteadly placing a constraint on the defense cost, 
@@ -184,30 +299,34 @@ def epsilon_constraint_method(m, defense_cost, attack_cost):
         epsilon_values.append(sum(c * x for c, x in zip(x_def_coeffs, combination)))
 
     epsilon_values = sorted(set(epsilon_values))
-    last_attack_cost = 0
     
     for epsilon in epsilon_values:
-        m.addConstr(defense_cost == epsilon, "epsilon_def_constr")
-        # can't model strict inequality, so just add a very small value
-        m.addConstr(attack_cost >= last_attack_cost + 1e-5, "attack_cost_constr") 
+        m.addConstr(defense_cost >= epsilon, "epsilon_def_constr")
         m.optimize()
         
         if m.status == GRB.OPTIMAL:
+            # Print results
+            _print_current_solution(m)
+                        
             results.append((defense_cost.getValue(), attack_cost.getValue()))
-            last_attack_cost = attack_cost.getValue()
+            
+            _add_min_atack_constraint(m, attack_cost.getValue())            
             m.remove(m.getConstrByName("epsilon_def_constr"))
-            m.remove(m.getConstrByName("attack_cost_constr"))
         else:
             results.append((epsilon, float('inf')))
-            print(f"No solution for defense_cost == {epsilon}")
+            _printif(f"No solution for defense_cost == {epsilon}")
+
+PRINT_PROGRESS = True
 
 # m, defense_cost, attack_cost = get_model_small_dag()
 
-m, defense_cost, attack_cost = get_model_infty_tree()
+# m, defense_cost, attack_cost = get_model_infty_tree()
 
-# no_good_cut_method(m, defense_cost, attack_cost)
+m, defense_cost, attack_cost = get_model_counter_example_dag()
 
-epsilon_constraint_method(m, defense_cost, attack_cost)
+no_good_cut_method(m, defense_cost)
 
-print("Results:", results)
+# epsilon_constraint_method(m, defense_cost, attack_cost)
+
+print('Results: ' + str(results))
 print("Time: {:.5f} ms.\n".format((timer() - start)*1000))
