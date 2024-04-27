@@ -210,20 +210,36 @@ def _add_min_atack_constraint(m, min_attack_cost):
 def _print_current_solution(m):
     def_c = defense_cost.getValue()
     att_c = m.objVal
-    _printif(f'Found solution {def_c, att_c}')
+    _printif(Fore.GREEN + f'Found solution {def_c, att_c}')
     _printif(', '.join([f'{v.varName}: {int(abs(v.x))}' for v in m.getVars() if not v.varName.startswith("aux_")]))
 
 def _printif(s):
     if PRINT_PROGRESS:
         print(s)
 
+def _compute_pf(actor, points):
+    if not points:
+        return []
+    
+    cost_dict = {}
+    for d, a in points:
+        if actor == 'a' and (d not in cost_dict or a > cost_dict[d]):
+            cost_dict[d] = a
+        elif actor == 'd' and (a not in cost_dict or d > cost_dict[a]):
+            cost_dict[a] = d
+    
+    if actor =='a':
+        return list(cost_dict.items())
+    
+    return [(d, a) for a,d in cost_dict.items()]
+
 def no_good_cut_method(m, defense_cost):
     prev_def_vectors = []
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
     
     # Keep track of last element
-    last_def_cost = -1
-    last_att_cost = -1
+    last_def_cost = sys.maxsize
+    last_att_cost = -sys.maxsize
         
     while True:
         m.optimize()
@@ -256,65 +272,24 @@ def no_good_cut_method(m, defense_cost):
         # Check if the solution is new
         if def_vec not in prev_def_vectors:
             _print_current_solution(m)
+            results.append((current_defense_cost, current_attack_cost))  # Record solution
             
             # Add exclusion for the current solution
             prev_def_vectors.append(def_vec)
+            
             _add_exclusion_constraint(m, x_d, def_vec)
             
-            sol = None
-            
-            if last_def_cost > -1 and current_defense_cost > last_def_cost:
-                sol = (last_def_cost, last_att_cost)
-                _add_min_defense_constraint(m, last_def_cost)
-                _add_min_atack_constraint(m, current_attack_cost)
+            # # Update the constraints to push for higher minimum attack cost
+            # if current_attack_cost > last_att_cost and current_defense_cost <= last_def_cost:
+            #     _add_min_atack_constraint(m, last_att_cost)
+                
+            last_att_cost = current_attack_cost
+            last_def_cost = current_defense_cost
 
-            elif current_defense_cost == last_def_cost:
-                # we encountered a case where different defense vectors reach the same solution
-                sol = (current_defense_cost, current_attack_cost)
-                _add_min_defense_constraint(m, current_defense_cost)
-                _add_min_atack_constraint(m, current_attack_cost)
-               
-            if sol:
-                _printif(Fore.GREEN + f'Added solution {sol}')
-                results.append(sol)           
-            
-            last_def_cost, last_att_cost = current_defense_cost, current_attack_cost
         else:
             _printif("Duplicate solution found, terminating...")
             break
 
-    return prev_def_vectors
-
-def epsilon_constraint_method(m, defense_cost, attack_cost):
-    """Find PF by placing repeteadly placing a constraint on the defense cost, 
-    and then optimizing the attack cost.
-    https://groups.google.com/g/gurobi/c/0AoQIqg6-UA/m/qWEw1R_wAAAJ
-    """
-    
-    x_def_coeffs = [defense_cost.getCoeff(i) for i in range(defense_cost.size())]
-    epsilon_values = []
-
-    # Generate all possible combinations of binary values for the variables
-    for combination in itertools.product([0, 1], repeat=len(x_def_coeffs)):
-        epsilon_values.append(sum(c * x for c, x in zip(x_def_coeffs, combination)))
-
-    epsilon_values = sorted(set(epsilon_values))
-    
-    for epsilon in epsilon_values:
-        m.addConstr(defense_cost >= epsilon, "epsilon_def_constr")
-        m.optimize()
-        
-        if m.status == GRB.OPTIMAL:
-            # Print results
-            _print_current_solution(m)
-                        
-            results.append((defense_cost.getValue(), attack_cost.getValue()))
-            
-            _add_min_atack_constraint(m, attack_cost.getValue())            
-            m.remove(m.getConstrByName("epsilon_def_constr"))
-        else:
-            results.append((epsilon, float('inf')))
-            _printif(f"No solution for defense_cost == {epsilon}")
 
 PRINT_PROGRESS = True
 
@@ -326,7 +301,8 @@ m, defense_cost, attack_cost = get_model_counter_example_dag()
 
 no_good_cut_method(m, defense_cost)
 
-# epsilon_constraint_method(m, defense_cost, attack_cost)
+results_pf = _compute_pf('a', results)
 
-print('Results: ' + str(results))
+_printif(Fore.RED + f'Removed {list(set(results) - set(results_pf))}')
+print('Results: ' + str(results_pf))
 print("Time: {:.5f} ms.\n".format((timer() - start)*1000))
