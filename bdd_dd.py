@@ -1,7 +1,7 @@
 import dd.bdd as _bdd
 
 from adtrees.adtree import ADTree
-from adtrees.attribute_domain import _reduce_pf_points
+from adtrees.attribute_domain import _reduce_pf_points_min
 from adtrees.basic_assignment import BasicAssignment
 
 from colorama import Fore, init

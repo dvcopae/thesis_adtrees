@@ -1,8 +1,11 @@
 import itertools
+from re import X
 from gurobipy import Model, GRB, quicksum
 import sys
 from timeit import default_timer as timer
 from colorama import Fore, init
+
+from util.util import remove_low_att_pts, remove_dominated_pts
 
 init(autoreset=True)
 
@@ -67,7 +70,9 @@ def get_model_small_dag():
     m.addConstr(x_INH_d2_a5 <= x_d2, "INH_inactive_if_d1_inactive")
 
     # AND has a single constraint: if it's activated, all nodes must be activated as well
-    m.addConstr((x_AND == 1) >> (x_INH_OR1_d1 + x_INH_OR2_d2 == 2), "root_AND")
+    m.addConstr(x_AND <= x_INH_OR1_d1)
+    m.addConstr(x_AND <= x_INH_OR2_d2)
+    m.addConstr(x_AND >= x_INH_OR1_d1 + x_INH_OR2_d2 - 1)
 
     m.setParam(GRB.Param.OutputFlag, 0)
 
@@ -187,6 +192,49 @@ def get_model_counter_example_dag():
     return m, defense_cost, attack_cost
 
 
+def get_aaa_model():
+    m = Model("bilp")
+
+    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
+
+    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
+    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
+
+    x_AND = m.addVar(vtype=GRB.BINARY, name="x_AND")
+
+    x_INH_a1_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_a1_d1")  # root
+
+    attack_cost = 1 * x_a1
+    defense_cost = 10 * x_d1 + 10 * x_d2
+
+    # Minimum damage objective
+    m.setObjectiveN(attack_cost, index=0, priority=1)
+    m.setObjectiveN(defense_cost, index=1, priority=0)
+
+    # root is always reached
+    m.addConstr(x_INH_a1_d1 == 1)
+
+    # INH constraints: INH = attack * (1-counterattack)
+    # and INH is disabled when attack is disabled
+    m.addConstr(x_INH_a1_d1 == x_a1 * (1 - x_AND))
+    m.addConstr(x_INH_a1_d1 <= x_a1)
+
+    # x_AND must be 1 if both x_d1 and x_d2 are 1
+    m.addConstr(x_AND <= x_d1)
+    m.addConstr(x_AND <= x_d2)
+    # Constraint that x_AND must be 0 if either x_d1 or x_d2 is 0
+    m.addConstr(x_AND >= x_d1 + x_d2 - 1)
+
+    m.setParam(GRB.Param.OutputFlag, 0)
+
+    m.update()
+
+    # Save problem
+    # m.write("infty_tree.lp")
+
+    return m, defense_cost, attack_cost
+
+
 def _add_exclusion_constraint(m, x_d, solution):
     """Add auxiliary constraints to ensure the current defenses do not repeat"""
     aux_vars = [m.addVar(vtype=GRB.BINARY, name=f"aux_{i}") for i in range(len(x_d))]
@@ -234,23 +282,6 @@ def _print_current_solution(m):
 def _printif(s):
     if PRINT_PROGRESS:
         print(s)
-
-
-def _compute_pf(actor, points):
-    if not points:
-        return []
-
-    cost_dict = {}
-    for d, a in points:
-        if actor == "a" and (d not in cost_dict or a > cost_dict[d]):
-            cost_dict[d] = a
-        elif actor == "d" and (a not in cost_dict or d > cost_dict[a]):
-            cost_dict[a] = d
-
-    if actor == "a":
-        return list(cost_dict.items())
-
-    return [(d, a) for a, d in cost_dict.items()]
 
 
 def no_good_cut_method(m, defense_cost):
@@ -323,9 +354,12 @@ PRINT_PROGRESS = True
 
 m, defense_cost, attack_cost = get_model_counter_example_dag()
 
+# m, defense_cost, attack_cost = get_aaa_model()
+
 no_good_cut_method(m, defense_cost)
 
-results_pf = _compute_pf("a", results)
+results_pf = remove_low_att_pts("a", results)
+results_pf = remove_dominated_pts("a", results_pf)
 
 _printif(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
 print("Results: " + str(results_pf))
