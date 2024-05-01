@@ -14,7 +14,7 @@ print(f'Is tree-like ? {T.is_proper_tree()}')
 print()
 ba = BasicAssignment(filepath)
 
-
+ 
 def measure_bu():
     _T = deepcopy(T)
     _ba = deepcopy(ba)

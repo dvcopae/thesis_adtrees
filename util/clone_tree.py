@@ -8,7 +8,7 @@ import random
 def generate_random_string(length=10):
     # Generate a random string of fixed length
     alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(length))
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def modify_labels(xml_path, output_path):
@@ -17,7 +17,7 @@ def modify_labels(xml_path, output_path):
     root = tree.getroot()
 
     # Modify each label element
-    labels = root.findall('.//label')
+    labels = root.findall(".//label")
     for label in labels:
         random_string = generate_random_string()
         label.text = random_string
@@ -37,12 +37,16 @@ def merge_trees(tree_path, tree_path_format):
         # Load the current root node from thesis_tree_6_i.xml
         tree_i = ET.parse(tree_path_format.format(i=j))
         root_i = tree_i.getroot()
-        root_node_i = root_i.find('node')
+        root_node_i = root_i.find("node")
 
         # Find all nodes in thesis_tree_large.xml that have exactly one <label> child
         candidate_nodes = []
-        for node in original_root.iter('node'):
-            if len(list(node)) == 1 and node.find('label') is not None and 'switchRole' not in node.attrib:
+        for node in original_root.iter("node"):
+            if (
+                len(list(node)) == 1
+                and node.find("label") is not None
+                and "switchRole" not in node.attrib
+            ):
                 candidate_nodes.append(node)
 
         # Choose a random node from the candidates
@@ -62,8 +66,8 @@ def merge_trees(tree_path, tree_path_format):
         os.remove(tree_path_format.format(i=j))
 
 
-filePath = 'thesis_tree.xml'
-formatFile = filePath[:-4] + '_{i}' + '.xml'
+filePath = "thesis_tree.xml"
+formatFile = filePath[:-4] + "_{i}" + ".xml"
 
 for i in range(5):
     modify_labels(filePath, formatFile.format(i=i))
