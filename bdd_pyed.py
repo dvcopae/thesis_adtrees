@@ -2,8 +2,8 @@ from pyeda.inter import expr, expr2bdd, bddvar
 from graphviz import Source
 
 from adtrees.adtree import ADTree
-from adtrees.attribute_domain import _reduce_pf_points_min
 from adtrees.basic_assignment import BasicAssignment
+from util.util import remove_dominated_pts
 
 filepath = "trees_w_assignments/thesis_dag.xml"
 ba = BasicAssignment(filepath)
@@ -52,7 +52,7 @@ for sat_raw in formula_bdd.satisfy_all():
 results = sorted(results, key=lambda x: (x[0], x[1]))
 print(f"Results: {results}")
 
-results = _reduce_pf_points_min(T.root.type, results)
+results = remove_dominated_pts(T.root.type, results)
 print(f"PF: {results}")
 
 s = Source(formula_bdd_dot, filename="./bdds/bdd_pyed", format="png")
