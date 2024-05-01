@@ -1,0 +1,112 @@
+
+digraph {
+
+    "L-1" -> "L0" [style="invis"];
+    "L0" -> "L1" [style="invis"];
+    "L1" -> "L2" [style="invis"];
+    "L2" -> "L3" [style="invis"];
+    "L3" -> "L4" [style="invis"];
+    "L4" -> "L5" [style="invis"];
+    "L5" -> "L6" [style="invis"];
+    "L6" -> "L7" [style="invis"];
+    "L7" -> "L8" [style="invis"];
+    "L8" -> "L9" [style="invis"];
+    2 -> 1 [style="dashed", taillabel="-1"];
+    2 -> 11 [style="solid"];
+    3 -> 18 [style="dashed"];
+    3 -> 5 [style="solid"];
+    4 -> 3 [style="dashed"];
+    4 -> 8 [style="solid"];
+    5 -> 9 [style="dashed"];
+    5 -> 18 [style="solid"];
+    6 -> 9 [style="dashed"];
+    6 -> 11 [style="solid"];
+    7 -> 2 [style="dashed"];
+    7 -> 19 [style="solid"];
+    8 -> 19 [style="dashed"];
+    8 -> 7 [style="solid"];
+    9 -> 2 [style="dashed"];
+    9 -> 11 [style="solid"];
+    10 -> 2 [style="dashed"];
+    10 -> 11 [style="solid"];
+    11 -> 1 [style="dashed", taillabel="-1"];
+    11 -> 1 [style="solid"];
+    37 -> 4 [style="dashed", taillabel="-1"];
+    37 -> 1 [style="solid"];
+    18 -> 6 [style="dashed"];
+    18 -> 11 [style="solid"];
+    19 -> 10 [style="dashed"];
+    19 -> 11 [style="solid"];
+    "ref-37" -> 37 [style="dashed", taillabel="-1"];
+
+    subgraph {
+        rank = same
+        "L-1" [label="ref", shape="none"];
+        "ref-37" [label="@-37"];
+    }
+
+    subgraph {
+        rank = same
+        "L0" [label="0", shape="none"];
+        37 [label="SKO-37"];
+    }
+
+    subgraph {
+        rank = same
+        "L1" [label="1", shape="none"];
+        4 [label="APUT-4"];
+    }
+
+    subgraph {
+        rank = same
+        "L2" [label="2", shape="none"];
+        3 [label="SU-3"];
+        8 [label="SU-8"];
+    }
+
+    subgraph {
+        rank = same
+        "L3" [label="3", shape="none"];
+        5 [label="DNS-5"];
+        7 [label="DNS-7"];
+    }
+
+    subgraph {
+        rank = same
+        "L4" [label="4", shape="none"];
+        18 [label="ESV-18"];
+        19 [label="ESV-19"];
+    }
+
+    subgraph {
+        rank = same
+        "L5" [label="5", shape="none"];
+        6 [label="ACV-6"];
+        10 [label="ACV-10"];
+    }
+
+    subgraph {
+        rank = same
+        "L6" [label="6", shape="none"];
+        9 [label="PA-9"];
+    }
+
+    subgraph {
+        rank = same
+        "L7" [label="7", shape="none"];
+        2 [label="BU-2"];
+    }
+
+    subgraph {
+        rank = same
+        "L8" [label="8", shape="none"];
+        11 [label="SDK-11"];
+    }
+
+    subgraph {
+        rank = same
+        "L9" [label="9", shape="none"];
+        1 [label="True-1"];
+    }
+
+}
