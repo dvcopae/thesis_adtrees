@@ -7,7 +7,7 @@ from copy import deepcopy
 
 
 min_cost_attr = AttrDomain(min, sum, min, sum, 0, float('inf'))
-filepath = 'trees_w_assignments/counter_example_dag.xml'
+filepath = 'trees_w_assignments/thesis_tree_extended.xml'
 T = ADTree(filepath)
 print(f'Tree size: {T.subtree_size()} (defenses: {len(T.get_basic_actions('d'))}, attacks: {len(T.get_basic_actions('a'))})')
 print(f'Is tree-like ? {T.is_proper_tree()}')
