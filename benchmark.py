@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from bu import run as run_bu
 from bilp import run as run_bilp
 
-x = [6, 12, 18, 24, 30]
+x = [6, 12, 18, 24, 30, 36]
 dummiest = []
 bilp_values = []
 
