@@ -478,9 +478,9 @@ def no_good_cut_method(m, defense_cost):
             break
 
 
-PRINT_PROGRESS = True
+PRINT_PROGRESS = False
 
-filepath = "trees_w_assignments/thesis_tree_extended.xml"
+filepath = "trees_w_assignments/thesis_tree_24.xml"
 T = ADTree(filepath)
 ba = BasicAssignment(filepath)
 

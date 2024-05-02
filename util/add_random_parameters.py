@@ -44,8 +44,8 @@ def add_values_to_basic_events(file_path):
 
     ET.indent(tree, space="  ", level=0)
     tree.write(
-        os.path.join("../trees_w_assignments", Path(file_path).stem + "_modified.xml")
+        os.path.join("./trees_w_assignments", Path(file_path).stem + "_modified.xml")
     )
 
 
-add_values_to_basic_events(os.path.join("rfid_dag.xml"))
+add_values_to_basic_events("./util//thesis_tree.xml")
