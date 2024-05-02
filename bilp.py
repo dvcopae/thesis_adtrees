@@ -13,6 +13,18 @@ from util.util import remove_low_att_pts, remove_dominated_pts
 
 init(autoreset=True)
 
+
+def warmup_bilp():
+    m = Model("warmup")
+    x = m.addVar(vtype=GRB.BINARY)
+    y = m.addVar(vtype=GRB.BINARY)
+    obj = 2 * x + 3 * y
+    m.setObjective(-obj)  # maximize
+    m.addConstr(x >= y)
+    m.setParam(GRB.Param.OutputFlag, 0)
+    m.optimize()
+
+
 def get_model(T: ADTree, ba: BasicAssignment):
     m = Model("bilp")
 
@@ -252,13 +264,18 @@ def no_good_cut_method(m, defense_cost):
         else:
             _printif("Duplicate solution found, terminating...")
             break
-        
+
     return results
 
 
 def run(filepath):
     T = ADTree(filepath)
-    print(f'Tree size: {T.subtree_size()} (defenses: {len(T.get_basic_actions('d'))}, attacks: {len(T.get_basic_actions('a'))})')
+    tree_size = T.subtree_size()
+    defense_count = len(T.get_basic_actions("d"))
+    attack_count = len(T.get_basic_actions("a"))
+    print(
+        f"Tree size: {tree_size} (defenses: {defense_count}, attacks: {attack_count})"
+    )
     ba = BasicAssignment(filepath)
 
     start = timer()
@@ -272,15 +289,15 @@ def run(filepath):
 
     _printif(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
     print(results_pf)
-    time = round((timer() - start)*1000, 2)
-    return time
+    time = round((timer() - start) * 1000, 2)
+    return time, tree_size, defense_count, attack_count
 
 
 PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     # for i in [6, 12, 18, 24, 30]:
-    #     time = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
+    #     time,_,_,_ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
     #     print(f'Time: {time} ms\n')
 
     run(f"./trees_w_assignments/thesis_tree_18.xml")
