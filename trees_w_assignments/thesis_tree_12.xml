@@ -1,0 +1,58 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>OR1</label>
+    <node refinement="conjunctive">
+      <label>a2</label>
+      <parameter domainId="MinCost1" category="basic">70235</parameter>
+      <node refinement="conjunctive" switchRole="yes">
+        <label>AND1</label>
+        <node refinement="conjunctive">
+          <label>0T95dZ9YXV</label>
+          <node refinement="conjunctive">
+            <label>i3wr4uT24u</label>
+            <parameter domainId="MinCost1" category="basic">46001</parameter>
+            <node refinement="conjunctive" switchRole="yes">
+              <label>PPgZQfRz5t</label>
+              <node refinement="conjunctive">
+                <label>rFqpfDSd99</label>
+                <parameter domainId="MinCost1" category="basic">37584</parameter>
+              </node>
+              <node refinement="conjunctive">
+                <label>OzVQ02tmK4</label>
+                <parameter domainId="MinCost1" category="basic">33100</parameter>
+              </node>
+              <node refinement="conjunctive" switchRole="yes">
+                <label>1VAtlZwZny</label>
+                <parameter domainId="MinCost1" category="basic">92264</parameter>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>jf7L5NFnbC</label>
+            <parameter domainId="MinCost1" category="basic">83242</parameter>
+          </node>
+        </node>
+        <node refinement="conjunctive">
+          <label>d2</label>
+          <parameter domainId="MinCost1" category="basic">66828</parameter>
+        </node>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>a1</label>
+          <parameter domainId="MinCost1" category="basic">75465</parameter>
+        </node>
+      </node>
+    </node>
+    <node refinement="conjunctive">
+      <label>a3</label>
+      <parameter domainId="MinCost1" category="basic">58132</parameter>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

@@ -13,10 +13,6 @@ from util.util import remove_low_att_pts, remove_dominated_pts
 
 init(autoreset=True)
 
-start = timer()
-results = []
-
-
 def get_model(T: ADTree, ba: BasicAssignment):
     m = Model("bilp")
 
@@ -145,228 +141,6 @@ def get_model(T: ADTree, ba: BasicAssignment):
     return m, defense_cost, attack_cost
 
 
-def get_model_small_dag():
-    m = Model("bilp")
-
-    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
-    x_a2 = m.addVar(vtype=GRB.BINARY, name="a2")
-    x_a3 = m.addVar(vtype=GRB.BINARY, name="a3")
-    x_a4 = m.addVar(vtype=GRB.BINARY, name="a4")
-    x_a5 = m.addVar(vtype=GRB.BINARY, name="a5")
-
-    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
-    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
-
-    x_OR1 = m.addVar(vtype=GRB.BINARY, name="OR_1")
-    x_OR2 = m.addVar(vtype=GRB.BINARY, name="OR_2")
-
-    x_INH_OR1_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_OR_1_d1")
-    x_INH_OR2_d2 = m.addVar(vtype=GRB.BINARY, name="x_INH_OR_2_d2")
-    x_INH_d1_a3 = m.addVar(vtype=GRB.BINARY, name="x_INH_d1_a3")
-    x_INH_d2_a5 = m.addVar(vtype=GRB.BINARY, name="x_INH_d2_a5")
-
-    x_AND = m.addVar(vtype=GRB.BINARY, name="root")  # root
-
-    attack_cost = 4 * x_a1 + 8 * x_a2 + 16 * x_a3 + 8 * x_a4 + 100 * x_a5
-    defense_cost = 2 * x_d1 + 4 * x_d2
-
-    # Minimum damage objective
-    m.setObjectiveN(attack_cost, index=0, priority=1, name="attack_cost")
-    m.setObjectiveN(defense_cost, index=1, priority=0, name="defense_cost")
-
-    # root is always reached
-    m.addConstr(x_AND == 1, "root_is_reached")
-
-    # each OR node has as many constraints as children,
-    # and one "upper_bound" to ensure that when all children are false, OR should be false
-    m.addConstr(x_OR1 >= x_a1, "OR_1_a1")
-    m.addConstr(x_OR1 >= x_a2, "OR_1_a2")
-    m.addConstr(x_OR1 <= x_a1 + x_a2, "OR_1_bound")
-
-    m.addConstr(x_OR2 >= x_a1, "OR_2_a1")
-    m.addConstr(x_OR2 >= x_a4, "OR_2_a4")
-    m.addConstr(x_OR2 <= x_a1 + x_a4, "OR_2_bound")
-
-    # INH constraints: INH = attack * (1-counterattack)
-    # and INH is disabled when attack is disabled
-    m.addConstr(x_INH_OR1_d1 == x_OR1 * (1 - x_INH_d1_a3), "INH_OR_1_d1_ON")
-    m.addConstr(x_INH_OR1_d1 <= x_OR1, "INH_OR_1_d1_OFF")
-
-    m.addConstr(x_INH_OR2_d2 == x_OR2 * (1 - x_INH_d2_a5), "INH_OR_2_d2_ON")
-    m.addConstr(x_INH_OR2_d2 <= x_OR2, "INH_OR_2_d2_OFF")
-
-    m.addConstr(x_INH_d1_a3 == x_d1 * (1 - x_a3), "INH_d1_a3_ON")
-    m.addConstr(x_INH_d1_a3 <= x_d1, "INH_d1_a3_OFF")
-
-    m.addConstr(x_INH_d2_a5 == x_d2 * (1 - x_a5), "INH_d2_a5_ON")
-    m.addConstr(x_INH_d2_a5 <= x_d2, "INH_d2_a5_OFF")
-
-    # AND has a single constraint: if it's activated, all nodes must be activated as well
-    m.addConstr(x_AND <= x_INH_OR1_d1, "root_INH_OR_1_d1")
-    m.addConstr(x_AND <= x_INH_OR2_d2, "root_INH_OR_2_d2")
-    m.addConstr(x_AND >= x_INH_OR1_d1 + x_INH_OR2_d2 - 1), "root_bound"
-
-    m.setParam(GRB.Param.OutputFlag, 0)
-
-    m.update()
-
-    # Save problem
-    m.write("small_dag.lp")
-
-    return m, defense_cost, attack_cost
-
-
-def get_model_infty_tree():
-    m = Model("bilp")
-
-    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
-    x_a2 = m.addVar(vtype=GRB.BINARY, name="a2")
-
-    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
-    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
-
-    x_INH_a1_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_a1_d1")
-    x_INH_a2_d2 = m.addVar(vtype=GRB.BINARY, name="x_INH_a2_d2")
-
-    x_OR = m.addVar(vtype=GRB.BINARY, name="x_OR")  # root
-
-    attack_cost = 1 * x_a1 + 2 * x_a2
-    defense_cost = 10 * x_d1 + 10 * x_d2
-
-    # Minimum damage objective
-    m.setObjectiveN(attack_cost, index=0, priority=1)
-    m.setObjectiveN(defense_cost, index=1, priority=0)
-
-    # root is always reached
-    m.addConstr(x_OR == 1)
-
-    # each OR node has as many constraints as children,
-    # and one "upper_bound" to ensure that when all children are false, OR should be false
-    m.addConstr(x_OR >= x_INH_a1_d1)
-    m.addConstr(x_OR >= x_INH_a2_d2)
-    m.addConstr(x_OR <= x_INH_a1_d1 + x_INH_a2_d2)
-
-    # INH constraints: INH = attack * (1-counterattack)
-    # and INH is disabled when attack is disabled
-    m.addConstr(x_INH_a1_d1 == x_a1 * (1 - x_d1))
-    m.addConstr(x_INH_a1_d1 <= x_a1)
-
-    m.addConstr(x_INH_a2_d2 == x_a2 * (1 - x_d2))
-    m.addConstr(x_INH_a2_d2 <= x_a2)
-
-    m.setParam(GRB.Param.OutputFlag, 0)
-
-    m.update()
-
-    # Save problem
-    # m.write("infty_tree.lp")
-
-    return m, defense_cost, attack_cost
-
-
-def get_model_counter_example_dag():
-    m = Model("bilp")
-
-    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
-    x_a2 = m.addVar(vtype=GRB.BINARY, name="a2")
-    x_a3 = m.addVar(vtype=GRB.BINARY, name="a3")
-
-    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
-    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
-
-    x_D_OR = m.addVar(vtype=GRB.BINARY, name="x_D_OR")
-
-    x_INH_a2_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_a2_d1")
-    x_INH_a3_d2 = m.addVar(vtype=GRB.BINARY, name="x_INH_a3_d2")
-    x_INH_a1_D_OR = m.addVar(vtype=GRB.BINARY, name="x_INH_a1_D_OR")
-
-    x_A_OR = m.addVar(vtype=GRB.BINARY, name="x_A_OR")  # root
-
-    attack_cost = 2 * x_a2 + 1 * x_a1 + 3 * x_a3
-    defense_cost = 10 * x_d1 + 10 * x_d2
-
-    # Minimum damage objective
-    m.setObjectiveN(attack_cost, index=0, priority=0)
-    m.setObjectiveN(defense_cost, index=1, priority=0)
-
-    # root is always reached
-    m.addConstr(x_A_OR == 1)
-
-    # each OR node has as many constraints as children -> without it you get scenarios where child=1 but or=0
-    # and one "upper_bound" to ensure that when all children are false, OR should be false -> without it, you get scenario where all children =0, but or=1
-    m.addConstr(x_D_OR >= x_d1)
-    m.addConstr(x_D_OR >= x_d2)
-    m.addConstr(x_D_OR <= x_d1 + x_d2)
-
-    m.addConstr(x_A_OR >= x_INH_a2_d1)
-    m.addConstr(x_A_OR >= x_INH_a3_d2)
-    m.addConstr(x_A_OR >= x_INH_a1_D_OR)
-    m.addConstr(x_A_OR <= x_INH_a2_d1 + x_INH_a3_d2 + x_INH_a1_D_OR)
-
-    # INH constraints: INH = attack * (1-counterattack)
-    # and INH is disabled when attack is disabled
-    m.addConstr(x_INH_a1_D_OR == x_a1 * (1 - x_D_OR))
-    m.addConstr(x_INH_a1_D_OR <= x_a1)
-
-    m.addConstr(x_INH_a2_d1 == x_a2 * (1 - x_d1))
-    m.addConstr(x_INH_a2_d1 <= x_a2)
-
-    m.addConstr(x_INH_a3_d2 == x_a3 * (1 - x_d2))
-    m.addConstr(x_INH_a3_d2 <= x_a3)
-
-    m.setParam(GRB.Param.OutputFlag, 0)  # disable logging
-
-    m.update()
-
-    # Save problem
-    # m.write("infty_tree.lp")
-
-    return m, defense_cost, attack_cost
-
-
-def get_aaa_model():
-    m = Model("bilp")
-
-    x_a1 = m.addVar(vtype=GRB.BINARY, name="a1")
-
-    x_d1 = m.addVar(vtype=GRB.BINARY, name="d1")
-    x_d2 = m.addVar(vtype=GRB.BINARY, name="d2")
-
-    x_AND = m.addVar(vtype=GRB.BINARY, name="x_AND")
-
-    x_INH_a1_d1 = m.addVar(vtype=GRB.BINARY, name="x_INH_a1_d1")  # root
-
-    attack_cost = 1 * x_a1
-    defense_cost = 10 * x_d1 + 10 * x_d2
-
-    # Minimum damage objective
-    m.setObjectiveN(attack_cost, index=0, priority=1)
-    m.setObjectiveN(defense_cost, index=1, priority=0)
-
-    # root is always reached
-    m.addConstr(x_INH_a1_d1 == 1)
-
-    # INH constraints: INH = attack * (1-counterattack)
-    # and INH is disabled when attack is disabled
-    m.addConstr(x_INH_a1_d1 == x_a1 * (1 - x_AND))
-    m.addConstr(x_INH_a1_d1 <= x_a1)
-
-    # x_AND must be 1 if both x_d1 and x_d2 are 1
-    m.addConstr(x_AND <= x_d1)
-    m.addConstr(x_AND <= x_d2)
-    # Constraint that x_AND must be 0 if either x_d1 or x_d2 is 0
-    m.addConstr(x_AND >= x_d1 + x_d2 - 1)
-
-    m.setParam(GRB.Param.OutputFlag, 0)
-
-    m.update()
-
-    # Save problem
-    # m.write("infty_tree.lp")
-
-    return m, defense_cost, attack_cost
-
-
 def _add_exclusion_constraint(m, x_d, solution):
     """Add auxiliary constraints to ensure the current defenses do not repeat"""
     aux_vars = [m.addVar(vtype=GRB.BINARY, name=f"aux_{i}") for i in range(len(x_d))]
@@ -384,19 +158,19 @@ def _add_exclusion_constraint(m, x_d, solution):
     m.addConstr(quicksum(aux_vars) >= 1, "exclusion")
 
 
-def _add_min_defense_constraint(m, min_defense_cost):
+def _add_min_defense_constraint(m, defense_cost, min_defense_cost):
     if m.getConstrByName("def_cost_constr"):
         m.remove(m.getConstrByName("def_cost_constr"))
     m.addConstr(defense_cost >= min_defense_cost + 1e-5, "def_cost_constr")
 
 
-def _add_min_atack_constraint(m, min_attack_cost):
+def _add_min_atack_constraint(m, attack_cost, min_attack_cost):
     if m.getConstrByName("attack_cost_constr"):
         m.remove(m.getConstrByName("attack_cost_constr"))
     m.addConstr(attack_cost >= min_attack_cost + 1e-5, "attack_cost_constr")
 
 
-def _print_current_solution(m):
+def _print_current_solution(m, defense_cost):
     def_c = defense_cost.getValue()
     att_c = m.objVal
     _printif(Fore.GREEN + f"Found solution {def_c, att_c}")
@@ -417,6 +191,8 @@ def _printif(s):
 
 
 def no_good_cut_method(m, defense_cost):
+    results = []
+
     prev_def_vectors = []
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
 
@@ -456,7 +232,7 @@ def no_good_cut_method(m, defense_cost):
 
         # Check if the solution is new
         if def_vec not in prev_def_vectors:
-            _print_current_solution(m)
+            _print_current_solution(m, defense_cost)
             results.append(
                 (current_defense_cost, current_attack_cost)
             )  # Record solution
@@ -476,30 +252,35 @@ def no_good_cut_method(m, defense_cost):
         else:
             _printif("Duplicate solution found, terminating...")
             break
+        
+    return results
+
+
+def run(filepath):
+    T = ADTree(filepath)
+    print(f'Tree size: {T.subtree_size()} (defenses: {len(T.get_basic_actions('d'))}, attacks: {len(T.get_basic_actions('a'))})')
+    ba = BasicAssignment(filepath)
+
+    start = timer()
+
+    m, defense_cost, attack_cost = get_model(T, ba)
+
+    results = no_good_cut_method(m, defense_cost)
+
+    results_pf = remove_low_att_pts("a", results)
+    results_pf = remove_dominated_pts("a", results_pf)
+
+    _printif(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
+    print(results_pf)
+    time = round((timer() - start)*1000, 2)
+    return time
 
 
 PRINT_PROGRESS = False
 
-filepath = "trees_w_assignments/thesis_tree_24.xml"
-T = ADTree(filepath)
-ba = BasicAssignment(filepath)
+if __name__ == "__main__":
+    # for i in [6, 12, 18, 24, 30]:
+    #     time = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
+    #     print(f'Time: {time} ms\n')
 
-m, defense_cost, attack_cost = get_model(T, ba)
-
-# m, defense_cost, attack_cost = get_model_small_dag()
-
-# m, defense_cost, attack_cost = get_model_infty_tree()
-
-# m, defense_cost, attack_cost = get_model_counter_example_dag()
-
-# m, defense_cost, attack_cost = get_aaa_model()
-
-
-no_good_cut_method(m, defense_cost)
-
-results_pf = remove_low_att_pts("a", results)
-results_pf = remove_dominated_pts("a", results_pf)
-
-_printif(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
-print("Results: " + str(results_pf))
-print("Time: {:.5f} ms.\n".format((timer() - start) * 1000))
+    run(f"./trees_w_assignments/thesis_tree_18.xml")

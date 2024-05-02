@@ -103,7 +103,7 @@ class AttrDomain:
         pts = remove_low_att_pts(T.root.type, pts)
         pts = remove_dominated_pts(T.root.type, pts)
 
-        print(f"(Size {len(pts)}): " + str(pts))
+        print(pts)
 
         return pts
 
@@ -130,7 +130,7 @@ class AttrDomain:
 
         pf = remove_dominated_pts(T.root.type, pts)
 
-        print(f"(Size {len(pf)})" + str(pf))
+        print(pf)
         if not T.is_proper_tree():
             print(
                 Fore.YELLOW
