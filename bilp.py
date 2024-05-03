@@ -148,26 +148,22 @@ def get_model(T: ADTree, ba: BasicAssignment):
 
     m.setParam(GRB.Param.OutputFlag, 0)
 
+    m.update()
+
     # m.write("model.lp")
 
     return m, defense_cost, attack_cost
 
 
 def _add_exclusion_constraint(m, x_d, solution):
-    """Add auxiliary constraints to ensure the current defenses do not repeat"""
-    aux_vars = [m.addVar(vtype=GRB.BINARY, name=f"aux_{i}") for i in range(len(x_d))]
-    m.update()
+    """Add auxiliary constraints to ensure the defense is `solutions`"""
 
     for i, var in enumerate(x_d):
-        if solution[i] == 1:
-            m.addConstr(
-                aux_vars[i] == 1 - var
-            )  # If enabled, set to the opposite of solution[i]
-        else:
-            m.addConstr(aux_vars[i] == var)  # If disabled, don't change anything
+        constr_name = f"aux{i}"
+        if m.getConstrByName(constr_name):
+            m.remove(m.getConstrByName(constr_name))
 
-    # at least one of the auxiliary variables is true
-    m.addConstr(quicksum(aux_vars) >= 1, "exclusion")
+        m.addConstr(var == solution[i], constr_name)
 
 
 def _add_min_defense_constraint(m, defense_cost, min_defense_cost):
@@ -212,7 +208,13 @@ def no_good_cut_method(m, defense_cost):
     last_def_cost = sys.maxsize
     last_att_cost = -sys.maxsize
 
-    while True:
+    iterations_time = []
+
+    for def_vector in itertools.product([0, 1], repeat=defense_cost.size()):
+        # start_optim = timer()
+
+        _add_exclusion_constraint(m, x_d, def_vector)
+
         m.optimize()
         if m.status != GRB.OPTIMAL:
             # Since we are adding the previous solutions instead of the current ones, the last one won't be added. Add it now.
@@ -240,30 +242,15 @@ def no_good_cut_method(m, defense_cost):
         current_defense_cost = defense_cost.getValue()
         current_attack_cost = m.objVal
 
-        def_vec = [int(var.x) for var in x_d]
+        _print_current_solution(m, defense_cost)
+        results.append((current_defense_cost, current_attack_cost))  # Record solution
 
-        # Check if the solution is new
-        if def_vec not in prev_def_vectors:
-            _print_current_solution(m, defense_cost)
-            results.append(
-                (current_defense_cost, current_attack_cost)
-            )  # Record solution
+        last_att_cost = current_attack_cost
+        last_def_cost = current_defense_cost
 
-            # Add exclusion for the current solution
-            prev_def_vectors.append(def_vec)
+        # iterations_time.append(round((timer() - start_optim) * 1000, 2))
 
-            _add_exclusion_constraint(m, x_d, def_vec)
-
-            # # Update the constraints to push for higher minimum attack cost
-            # if current_attack_cost > last_att_cost and current_defense_cost <= last_def_cost:
-            #     _add_min_atack_constraint(m, last_att_cost)
-
-            last_att_cost = current_attack_cost
-            last_def_cost = current_defense_cost
-
-        else:
-            _printif("Duplicate solution found, terminating...")
-            break
+    # print(", ".join([str((i, v)) for i, v in enumerate(iterations_time)]))
 
     return results
 
@@ -300,4 +287,5 @@ if __name__ == "__main__":
     #     time,_,_,_ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
     #     print(f'Time: {time} ms\n')
 
-    run(f"./trees_w_assignments/thesis_tree_18.xml")
+    time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_24.xml")
+    print(f"Time: {time} ms\n")
