@@ -58,4 +58,4 @@ if __name__ == "__main__":
     #     time,_,_,_ = run('dummiest', f'./trees_w_assignments/thesis_tree_{i}.xml')
     #     print(f'Time: {time} ms\n')
 
-    run("dummiest", "./trees_w_assignments/thesis_tree_36.xml")
+    run("dummiest", "./trees_w_assignments/early_termination.xml")

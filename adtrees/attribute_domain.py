@@ -130,13 +130,13 @@ class AttrDomain:
 
         pf = remove_dominated_pts(T.root.type, pts)
 
-        print(pf)
         if not T.is_proper_tree():
             print(
                 Fore.YELLOW
                 + "## WARNING ##: The results are not correct since the tree is a DAG."
             )
 
+        print(pf)
         return pf
 
     def evaluate_bu(self, T: ADTree, ba: BasicAssignment, print_progress: True):

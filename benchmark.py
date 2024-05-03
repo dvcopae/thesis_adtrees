@@ -38,8 +38,17 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xlabel("Tree size(defenses)")
     plt.xticks(x, x_labels)
-    plt.ylabel("ms")
+    plt.ylabel("Runtime (ms)")
     plt.plot(x, bilp_values, linestyle="--", marker="o", label="bilp")
     plt.plot(x, dummiest_values, linestyle="--", marker="o", label="dummiest")
+
+    # Annotate bilp values on the plot
+    for i, txt in enumerate(bilp_values):
+        plt.annotate(txt, (x[i], round(bilp_values[i], 1)))
+
+    # Annotate dummiest values on the plot
+    for i, txt in enumerate(dummiest_values):
+        plt.annotate(txt, (x[i], round(dummiest_values[i], 1)))
+
     plt.legend(loc="best")
     plt.savefig("benchmark.png")

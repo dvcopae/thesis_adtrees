@@ -1,7 +1,9 @@
+from functools import lru_cache
 from hmac import new
 import itertools
 from re import X
 from gurobipy import LinExpr, Model, GRB, quicksum
+import cProfile
 import sys
 from timeit import default_timer as timer
 from colorama import Fore, init
@@ -32,9 +34,10 @@ def get_model(T: ADTree, ba: BasicAssignment):
     x_deffs = []
     x_refinements = []
 
-    # Maps the ADTree nodes to model variables
+    # Maps the ADTree nodes labels to model variables
     model_vars = {}
 
+    @lru_cache(maxsize=None)
     def get_inh_label(action: ADNode, counter: ADNode):
         return f"INH_{action.label}_{counter.label}"
 
@@ -51,32 +54,31 @@ def get_model(T: ADTree, ba: BasicAssignment):
             node.label if not countered else get_inh_label(node, T.get_counter(node))
         )
 
-        for k, v in model_vars.items():
-            if isinstance(k, str):
-                if k == label:
-                    return v
-            else:
-                if k.label == label:
-                    return v
+        return model_vars[label]
+
+    attack_cost = LinExpr()
+    defense_cost = LinExpr()
 
     # Add all nodes of the tree to BILP variables
     for ad_node in T.dict.keys():
-        new_node = False
         label = ad_node.label
         if ad_node.ref == "":  # basic step
             if ad_node.type == "a" and check_unique_label(label, x_attacks):
                 x_attacks.append(ad_node)
-                new_node = True
+                x = m.addVar(vtype=GRB.BINARY, name=label)
+                model_vars[label] = x
+                attack_cost.add(ba[ad_node.label] * get_model_node(ad_node, False))
+
             elif ad_node.type == "d" and check_unique_label(label, x_deffs):
                 x_deffs.append(ad_node)
-                new_node = True
+                x = m.addVar(vtype=GRB.BINARY, name=label)
+                model_vars[label] = x
+                defense_cost.add(ba[ad_node.label] * get_model_node(ad_node, False))
+
         elif check_unique_label(label, x_refinements):
             x_refinements.append(ad_node)
-            new_node = True
-
-        if new_node:
             x = m.addVar(vtype=GRB.BINARY, name=label)
-            model_vars[ad_node] = x
+            model_vars[label] = x
 
         countered = T.get_counter(ad_node)
         if countered:
@@ -84,22 +86,12 @@ def get_model(T: ADTree, ba: BasicAssignment):
             x = m.addVar(vtype=GRB.BINARY, name=inh_label)
             model_vars[inh_label] = x
 
-    attack_cost = LinExpr()
-    for a in x_attacks:
-        attack_cost.add(ba[a.label] * model_vars[a])
-
-    defense_cost = LinExpr()
-    for d in x_deffs:
-        defense_cost.add(ba[d.label] * model_vars[d])
-
     # Minimum damage objective
     m.setObjectiveN(attack_cost, index=0, priority=1, name="attack_cost")
     m.setObjectiveN(defense_cost, index=1, priority=0, name="defense_cost")
 
-    m.update()
-
     # root is always reached
-    m.addConstr(model_vars[T.root] == 1, "root_is_reached")
+    m.addConstr(get_model_node(T.root) == 1, "root_is_reached")
 
     # We start from the bottom nodes to have the necessary variable as we go up the tree
     for ad_node in reversed(T.dict.keys()):
@@ -108,7 +100,7 @@ def get_model(T: ADTree, ba: BasicAssignment):
         countered = T.get_counter(ad_node)
         if countered:  # INH gate
             x_inh_node = get_model_node(ad_node)
-            inh_label = x_inh_node.VarName
+            inh_label = get_inh_label(ad_node, countered)
             # x_INH = attack * (1-counterattack)
             m.addConstr(
                 x_inh_node == model_node * (1 - get_model_node(countered)),
@@ -120,28 +112,30 @@ def get_model(T: ADTree, ba: BasicAssignment):
         if ad_node.ref == "":  # basic event
             continue
 
-        children = [
-            get_model_node(c)
+        label_children = [
+            (c.label, get_model_node(c))
             for c in T.get_children(ad_node)
             if not countered or c != countered
         ]
         children_sum_expr = LinExpr()
-        children_sum_expr.addTerms([1] * len(children), children)
+        children_sum_expr.addTerms(
+            [1] * len(label_children), [c[1] for c in label_children]
+        )
 
         if ad_node.ref == "AND":
             # x_AND must be 1 if all children are 1
-            for c in children:
-                m.addConstr(model_node <= c, name=f"{ad_node.label}_{c.VarName}")
+            for c_label, c in label_children:
+                m.addConstr(model_node <= c, name=f"{ad_node.label}_{c_label}")
 
             # Constraint that x_AND must be 0 if either child is 0
             m.addConstr(
-                model_node >= children_sum_expr - (len(children) - 1),
+                model_node >= children_sum_expr - (len(label_children) - 1),
                 name=f"{ad_node.label}_bound",
             )
         elif ad_node.ref == "OR":
             # X_OR must be 1 if at least one child is 1
-            for c in children:
-                m.addConstr(model_node >= c, name=f"{ad_node.label}_{c.VarName}")
+            for c_label, c in label_children:
+                m.addConstr(model_node >= c, name=f"{ad_node.label}_{c_label}")
 
             # X_OR must be 0 if all children are 0
             m.addConstr(model_node <= children_sum_expr, name=f"{ad_node.label}_bound")
@@ -160,10 +154,13 @@ def _add_exclusion_constraint(m, x_d, solution):
 
     for i, var in enumerate(x_d):
         constr_name = f"aux{i}"
-        if m.getConstrByName(constr_name):
-            m.remove(m.getConstrByName(constr_name))
+        constraint = m.getConstrByName(constr_name)
 
-        m.addConstr(var == solution[i], constr_name)
+        if constraint:
+            # Update right hand side (after =) of solution
+            constraint.RHS = solution[i]
+        else:
+            m.addConstr(var == solution[i], name=constr_name)
 
 
 def _add_min_defense_constraint(m, defense_cost, min_defense_cost):
@@ -178,30 +175,9 @@ def _add_min_atack_constraint(m, attack_cost, min_attack_cost):
     m.addConstr(attack_cost >= min_attack_cost + 1e-5, "attack_cost_constr")
 
 
-def _print_current_solution(m, defense_cost):
-    def_c = defense_cost.getValue()
-    att_c = m.objVal
-    _printif(Fore.GREEN + f"Found solution {def_c, att_c}")
-    _printif(
-        ", ".join(
-            [
-                f"{v.varName}: {int(abs(v.x))}"
-                for v in m.getVars()
-                if not v.varName.startswith("aux_")
-            ]
-        )
-    )
-
-
-def _printif(s):
-    if PRINT_PROGRESS:
-        print(s)
-
-
-def no_good_cut_method(m, defense_cost):
+def no_good_cut_method(m, defense_cost, attack_cost):
     results = []
 
-    prev_def_vectors = []
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
 
     # Keep track of last element
@@ -220,7 +196,8 @@ def no_good_cut_method(m, defense_cost):
             # Since we are adding the previous solutions instead of the current ones, the last one won't be added. Add it now.
             sol = (last_def_cost, last_att_cost)
             if sol not in results:
-                _printif(Fore.GREEN + f"Added solution {sol}")
+                if PRINT_PROGRESS:
+                    print(Fore.GREEN + f"Added solution {sol}")
                 results.append(sol)
 
             # Add the next possible output of the function `defense_cost` and infty to the results
@@ -232,17 +209,33 @@ def no_good_cut_method(m, defense_cost):
                 def_cost_output = sum(c * x for c, x in zip(x_def_coeffs, combination))
                 if def_cost_output > last_def_cost:
                     sol = (def_cost_output, float("inf"))
-                    _printif(Fore.GREEN + f"Added solution {sol}")
+                    if PRINT_PROGRESS:
+                        print(Fore.GREEN + f"Added solution {sol}")
                     results.append(sol)
                     break
 
-            _printif("No more feasible solutions.")
+            if PRINT_PROGRESS:
+                print("No more feasible solutions.")
             break
 
         current_defense_cost = defense_cost.getValue()
         current_attack_cost = m.objVal
 
-        _print_current_solution(m, defense_cost)
+        if PRINT_PROGRESS:
+            print(
+                Fore.GREEN
+                + f"Found solution {current_defense_cost, current_attack_cost}"
+            )
+            print(
+                ", ".join(
+                    [
+                        f"{v.varName}: {int(abs(v.x))}"
+                        for v in m.getVars()
+                        if not v.varName.startswith("aux_")
+                    ]
+                )
+            )
+
         results.append((current_defense_cost, current_attack_cost))  # Record solution
 
         last_att_cost = current_attack_cost
@@ -269,12 +262,14 @@ def run(filepath):
 
     m, defense_cost, attack_cost = get_model(T, ba)
 
-    results = no_good_cut_method(m, defense_cost)
+    results = no_good_cut_method(m, defense_cost, attack_cost)
 
     results_pf = remove_low_att_pts("a", results)
     results_pf = remove_dominated_pts("a", results_pf)
 
-    _printif(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
+    if PRINT_PROGRESS:
+        print(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
+
     print(results_pf)
     time = round((timer() - start) * 1000, 2)
     return time, tree_size, defense_count, attack_count
@@ -287,5 +282,7 @@ if __name__ == "__main__":
     #     time,_,_,_ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
     #     print(f'Time: {time} ms\n')
 
-    time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_24.xml")
+    time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_36.xml")
     print(f"Time: {time} ms\n")
+
+    # cProfile.run('run(f"./trees_w_assignments/thesis_tree_24.xml")')
