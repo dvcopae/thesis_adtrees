@@ -1,4 +1,4 @@
-import threading
+from concurrent.futures import ProcessPoolExecutor
 import matplotlib.pyplot as plt
 
 from bu import run as run_bu
@@ -10,38 +10,36 @@ dummiest_values = []
 bilp_values = []
 
 
-def eval_dummiest():
-    for i in x:
-        time_bu, tree_size, def_size, att_size = run_bu(
-            "dummiest", f"./trees_w_assignments/thesis_tree_{i}.xml"
-        )
-        x_labels.append(f"{tree_size}({def_size})")
-        dummiest_values.append(time_bu)
+def eval_dummiest(i):
+    time_bu, tree_size, def_size, att_size = run_bu(
+        "dummiest", f"./trees_w_assignments/thesis_tree_{i}.xml"
+    )
+    return f"{tree_size}({def_size})", time_bu
 
 
-def eval_bilp():
-    warmup_bilp()
-    for i in x:
-        time_bilp, _, _, _ = run_bilp(f"./trees_w_assignments/thesis_tree_{i}.xml")
-        bilp_values.append(time_bilp)
+def eval_bilp(i):
+    time_bilp, _, _, _ = run_bilp(f"./trees_w_assignments/thesis_tree_{i}.xml")
+    return time_bilp
 
 
-t1 = threading.Thread(target=eval_dummiest)
-t2 = threading.Thread(target=eval_bilp)
+if __name__ == "__main__":
+    with ProcessPoolExecutor() as executor:
+        warmup_bilp()
 
-t1.start()
-t2.start()
+        # Collect dummiest values and x_labels using parallel execution
+        results = executor.map(eval_dummiest, x)
+        for label, value in results:
+            x_labels.append(label)
+            dummiest_values.append(value)
 
-t1.join()
-t2.join()
+        # Collect bilp values using parallel execution
+        bilp_values.extend(executor.map(eval_bilp, x))
 
-plt.yscale("log")
-plt.xlabel("Tree size(defenses)")
-plt.xticks(x, x_labels)
-plt.ylabel("ms")
-plt.plot(x, bilp_values, linestyle="--", marker="o", label="bilp")
-plt.plot(x, dummiest_values, linestyle="--", marker="o", label="dummiest")
-plt.legend(loc="best")
-plt.savefig("benchmark.png")
-
-# plt.show()
+    plt.yscale("log")
+    plt.xlabel("Tree size(defenses)")
+    plt.xticks(x, x_labels)
+    plt.ylabel("ms")
+    plt.plot(x, bilp_values, linestyle="--", marker="o", label="bilp")
+    plt.plot(x, dummiest_values, linestyle="--", marker="o", label="dummiest")
+    plt.legend(loc="best")
+    plt.savefig("benchmark.png")
