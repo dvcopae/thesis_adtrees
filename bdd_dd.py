@@ -1,3 +1,4 @@
+import itertools
 import dd.bdd as _bdd
 
 from adtrees.adtree import ADTree
@@ -10,16 +11,6 @@ from timeit import default_timer as timer
 from util.util import remove_dominated_pts
 
 init(autoreset=True)
-
-
-filepath = "trees_w_assignments/thesis_dag.xml"
-ba = BasicAssignment(filepath)
-T = ADTree(filepath)
-
-defenses = T.get_basic_actions("d")
-attacks = T.get_basic_actions("a")
-
-start = timer()
 
 
 def get_model_infty_tree():
@@ -107,6 +98,7 @@ def _eval_path_cost(path: dict):
 
 def run(bdd, root):
     pf_dict = {}
+    all_paths = []
 
     for c in bdd._sat_iter(root, dict(), True):
         def_cost, att_cost = _eval_path_cost(c)
@@ -115,6 +107,8 @@ def run(bdd, root):
         for s in defenses + attacks:
             if s not in c:
                 c[s] = False
+
+        all_paths.append(c)
 
         prev_path = pf_dict.get(def_cost)
         if prev_path:
@@ -134,7 +128,22 @@ def run(bdd, root):
         if PRINT_PROGRESS:
             print(Fore.GREEN + f"{(def_cost, att_cost)} {c}")
 
-    pf = [_eval_path_cost(c) for c in pf_dict.values()]
+    pf_dict_paths = pf_dict.values()
+
+    pf = [_eval_path_cost(c) for c in pf_dict_paths]
+
+    # Add infty costs
+    for def_vector in itertools.product([False, True], repeat=len(defenses)):
+        def_dict = dict(zip(defenses, def_vector))
+
+        # Check if `def_dict` is not found as a solution
+        if not any(
+            all(path[key] == value for key, value in def_dict.items())
+            for path in all_paths
+        ):
+            def_cost = sum([ba[defense] for defense in def_dict if def_dict[defense]])
+            pf.append((def_cost, float("inf")))
+
     pf = remove_dominated_pts("a", pf)
 
     time = round((timer() - start) * 1000, 2)
@@ -143,6 +152,15 @@ def run(bdd, root):
 
 
 PRINT_PROGRESS = False
+
+filepath = "trees_w_assignments/thesis_dag.xml"
+ba = BasicAssignment(filepath)
+T = ADTree(filepath)
+
+defenses = T.get_basic_actions("d")
+attacks = T.get_basic_actions("a")
+
+start = timer()
 
 bdd, root = get_model_thesis_dag()
 time, pf = run(bdd, root)
