@@ -37,7 +37,6 @@ def get_model(T: ADTree, ba: BasicAssignment):
     # Maps the ADTree nodes labels to model variables
     model_vars = {}
 
-    @lru_cache(maxsize=None)
     def get_inh_label(action: ADNode, counter: ADNode):
         return f"INH_{action.label}_{counter.label}"
 
@@ -62,17 +61,18 @@ def get_model(T: ADTree, ba: BasicAssignment):
     # Add all nodes of the tree to BILP variables
     for ad_node in T.dict.keys():
         label = ad_node.label
+
         if ad_node.ref == "":  # basic step
             if ad_node.type == "a" and check_unique_label(label, x_attacks):
-                x_attacks.append(ad_node)
                 x = m.addVar(vtype=GRB.BINARY, name=label)
                 model_vars[label] = x
+                x_attacks.append(ad_node)
                 attack_cost.add(ba[ad_node.label] * get_model_node(ad_node, False))
 
             elif ad_node.type == "d" and check_unique_label(label, x_deffs):
-                x_deffs.append(ad_node)
                 x = m.addVar(vtype=GRB.BINARY, name=label)
                 model_vars[label] = x
+                x_deffs.append(ad_node)
                 defense_cost.add(ba[ad_node.label] * get_model_node(ad_node, False))
 
         elif check_unique_label(label, x_refinements):
@@ -101,12 +101,12 @@ def get_model(T: ADTree, ba: BasicAssignment):
         if countered:  # INH gate
             x_inh_node = get_model_node(ad_node)
             inh_label = get_inh_label(ad_node, countered)
-            # x_INH = attack * (1-counterattack)
+            # x_INH is attack * (1-counterattack)
             m.addConstr(
                 x_inh_node == model_node * (1 - get_model_node(countered)),
                 name=f"{inh_label}_ON",
             )
-            # x_INH is disabled when attack is disabled
+            # x_INH is 0 when attack is 0
             m.addConstr(x_inh_node <= model_node, name=f"{inh_label}_OFF")
 
         if ad_node.ref == "":  # basic event
@@ -184,15 +184,27 @@ def no_good_cut_method(m, defense_cost, attack_cost):
     last_def_cost = sys.maxsize
     last_att_cost = -sys.maxsize
 
-    iterations_time = []
+    infty_vectors = []
 
     for def_vector in itertools.product([0, 1], repeat=defense_cost.size()):
-        # start_optim = timer()
+        # def_vector must not `extend` any of the defense vectors which result in an infinity cost
+        skip = False
+        for iv in infty_vectors:
+            if all(iv[i] == 0 or iv[i] == def_vector[i] for i in range(len(iv))):
+                skip = True
+                continue
+
+        if skip:
+            continue
 
         _add_exclusion_constraint(m, x_d, def_vector)
 
         m.optimize()
+
         if m.status != GRB.OPTIMAL:
+            if 0 in def_vector:
+                infty_vectors.append(def_vector)
+
             # Since we are adding the previous solutions instead of the current ones, the last one won't be added. Add it now.
             sol = (last_def_cost, last_att_cost)
             if sol not in results:
@@ -200,23 +212,18 @@ def no_good_cut_method(m, defense_cost, attack_cost):
                     print(Fore.GREEN + f"Added solution {sol}")
                 results.append(sol)
 
-            # Add the next possible output of the function `defense_cost` and infty to the results
+            # Compute the defense cost manually, as the model has no solution for it
             x_def_coeffs = [
                 defense_cost.getCoeff(i) for i in range(defense_cost.size())
             ]
+            def_cost_output = sum(c * x for c, x in zip(x_def_coeffs, def_vector))
 
-            for combination in itertools.product([0, 1], repeat=len(x_def_coeffs)):
-                def_cost_output = sum(c * x for c, x in zip(x_def_coeffs, combination))
-                if def_cost_output > last_def_cost:
-                    sol = (def_cost_output, float("inf"))
-                    if PRINT_PROGRESS:
-                        print(Fore.GREEN + f"Added solution {sol}")
-                    results.append(sol)
-                    break
-
+            sol = (def_cost_output, float("inf"))
             if PRINT_PROGRESS:
-                print("No more feasible solutions.")
-            break
+                print(Fore.GREEN + f"Added solution {sol}")
+            results.append(sol)
+
+            continue
 
         current_defense_cost = defense_cost.getValue()
         current_attack_cost = m.objVal
@@ -240,10 +247,6 @@ def no_good_cut_method(m, defense_cost, attack_cost):
 
         last_att_cost = current_attack_cost
         last_def_cost = current_defense_cost
-
-        # iterations_time.append(round((timer() - start_optim) * 1000, 2))
-
-    # print(", ".join([str((i, v)) for i, v in enumerate(iterations_time)]))
 
     return results
 
@@ -282,7 +285,7 @@ if __name__ == "__main__":
     #     time,_,_,_ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
     #     print(f'Time: {time} ms\n')
 
-    time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_36.xml")
+    time, _, _, _ = run(f"./trees_w_assignments/thesis_dag.xml")
     print(f"Time: {time} ms\n")
 
     # cProfile.run('run(f"./trees_w_assignments/thesis_tree_24.xml")')
