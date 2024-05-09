@@ -92,7 +92,7 @@ def run(filepath, dump=False):
 
     bdd = _bdd.BDD()
     bdd.configure(reordering=True)
-    bdd.declare(*T.get_basic_actions())
+    bdd.declare(*(defenses + attacks))
     expr = T.get_boolean_expression()
     TREE = bdd.add_expr(expr)
 
@@ -103,7 +103,7 @@ def run(filepath, dump=False):
     if PRINT_PROGRESS:
         print(f"Initial size: {len(bdd)}")
 
-    _bdd.reorder(bdd, custom_order)
+    _bdd.reorder(bdd, order=custom_order)
 
     if dump:
         bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
