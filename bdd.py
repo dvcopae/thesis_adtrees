@@ -1,6 +1,8 @@
 import itertools
+from typing import List, Tuple
 import dd.bdd as _bdd
 
+from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
 
@@ -13,95 +15,26 @@ from util.util import remove_dominated_pts
 init(autoreset=True)
 
 
-def get_model_infty_tree():
-    bdd = _bdd.BDD()
-    bdd.configure(reordering=True)
-
-    bdd.declare("a1", "a2", "d1", "d2")
-    TREE = bdd.add_expr("(a1 & !d1) | (a2 & !d2)")
-    custom_order = dict(d1=0, d2=1, a1=2, a2=3)
-
-    bdd.incref(TREE)
-
-    if PRINT_PROGRESS:
-        print(f"Initial size: {len(bdd)}")
-
-    _bdd.reorder(bdd, custom_order)
-
-    # bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
-
-    if PRINT_PROGRESS:
-        print(f"Size after custom-order: {len(bdd)}")
-
-    bdd.decref(TREE)
-
-    return bdd, TREE
-
-
-def get_model_counter_example_dag():
-    bdd = _bdd.BDD()
-    bdd.configure(reordering=True)
-
-    bdd.declare("a1", "a2", "a3", "d1", "d2")
-    TREE = bdd.add_expr("(!d1 & a2) | (!(d1 | d2) & a1) | (!d2 & a3)")
-    custom_order = dict(d1=0, d2=1, a1=2, a2=3, a3=4)
-
-    bdd.incref(TREE)
-
-    if PRINT_PROGRESS:
-        print(f"Initial size: {len(bdd)}")
-
-    _bdd.reorder(bdd, custom_order)
-
-    # bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
-
-    if PRINT_PROGRESS:
-        print(f"Size after custom-order: {len(bdd)}")
-
-    bdd.decref(TREE)
-
-    return bdd, TREE
-
-
-def get_model_thesis_dag():
-    bdd = _bdd.BDD()
-    bdd.configure(reordering=True)
-
-    bdd.declare("SU", "DNS", "ACV", "ESV", "APUT", "PA", "BU", "SKO", "SDK")
-    TREE = bdd.add_expr(
-        "((!(SU & !DNS) & ACV) | (!(SU & !DNS) & ESV) | (!APUT & PA) | BU) & (!SKO & SDK)"
-    )
-    custom_order = dict(SKO=0, APUT=1, SU=2, DNS=3, ESV=4, ACV=5, PA=6, BU=7, SDK=9)
-
-    bdd.incref(TREE)
-
-    if PRINT_PROGRESS:
-        print(f"Initial size: {len(bdd)}")
-
-    _bdd.reorder(bdd, custom_order)
-
-    # bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
-
-    if PRINT_PROGRESS:
-        print(f"Size after custom-order: {len(bdd)}")
-
-    bdd.decref(TREE)
-
-    return bdd, TREE
-
-
-def _eval_path_cost(path: dict):
+def _eval_path_cost(
+    path: dict, ba: BasicAssignment, defenses: List[str], attacks: List[str]
+) -> Tuple[float, float]:
     def_cost = sum([ba[d] for d in defenses if d in path and path[d]])
     att_cost = sum([ba[a] for a in attacks if a in path and path[a]])
     return (def_cost, att_cost)
 
 
-def run(bdd, root):
+def compute_pf(
+    bdd: _bdd.BDD,
+    root: ADNode,
+    ba: BasicAssignment,
+    defenses: List[str],
+    attacks: List[str],
+) -> List[float]:
     pf_dict = {}
     all_paths = []
 
     for c in bdd._sat_iter(root, dict(), True):
-        def_cost, att_cost = _eval_path_cost(c)
+        def_cost, att_cost = _eval_path_cost(c, ba, defenses, attacks)
 
         # Fill path with missing values
         for s in defenses + attacks:
@@ -112,7 +45,7 @@ def run(bdd, root):
 
         prev_path = pf_dict.get(def_cost)
         if prev_path:
-            _, prev_att_cost = _eval_path_cost(prev_path)
+            _, prev_att_cost = _eval_path_cost(prev_path, ba, defenses, attacks)
             if all(prev_path[d] == c[d] for d in defenses):
                 if att_cost < prev_att_cost:
                     # We have the same defense vector as the current solution -> MINIMIZE att_cost
@@ -130,7 +63,7 @@ def run(bdd, root):
 
     pf_dict_paths = pf_dict.values()
 
-    pf = [_eval_path_cost(c) for c in pf_dict_paths]
+    pf = [_eval_path_cost(c, ba, defenses, attacks) for c in pf_dict_paths]
 
     # Add infty costs
     for def_vector in itertools.product([False, True], repeat=len(defenses)):
@@ -146,6 +79,44 @@ def run(bdd, root):
 
     pf = remove_dominated_pts("a", pf)
 
+    return pf
+
+
+def run(filepath, dump=False):
+    ba = BasicAssignment(filepath)
+    T = ADTree(filepath)
+    defenses = T.get_basic_actions("d")
+    attacks = T.get_basic_actions("a")
+
+    start = timer()
+
+    bdd = _bdd.BDD()
+    bdd.configure(reordering=True)
+    bdd.declare(*T.get_basic_actions())
+    expr = T.get_boolean_expression()
+    TREE = bdd.add_expr(expr)
+
+    custom_order = {d: i for i, d in enumerate(defenses + attacks)}
+
+    bdd.incref(TREE)
+
+    if PRINT_PROGRESS:
+        print(f"Initial size: {len(bdd)}")
+
+    _bdd.reorder(bdd, custom_order)
+
+    if dump:
+        bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
+
+    bdd.decref(TREE)
+
+    if PRINT_PROGRESS:
+        print(f"Size after custom-order: {len(bdd)}")
+
+    pf = compute_pf(bdd, TREE, ba, defenses, attacks)
+
+    print(pf)
+
     time = round((timer() - start) * 1000, 2)
 
     return time, pf
@@ -153,17 +124,10 @@ def run(bdd, root):
 
 PRINT_PROGRESS = False
 
-filepath = "trees_w_assignments/thesis_dag.xml"
-ba = BasicAssignment(filepath)
-T = ADTree(filepath)
+if __name__ == "__main__":
+    # for i in [6, 12, 18, 24, 30]:
+    #     time, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
+    #     print(f"Time: {time} ms\n")
 
-defenses = T.get_basic_actions("d")
-attacks = T.get_basic_actions("a")
-
-start = timer()
-
-bdd, root = get_model_thesis_dag()
-time, pf = run(bdd, root)
-
-print(pf)
-print(f"Time: {time} ms\n")
+    time, _ = run("./trees_w_assignments/thesis_tree_24.xml")
+    print(f"Time: {time} ms\n")

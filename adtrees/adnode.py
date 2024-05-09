@@ -24,7 +24,7 @@ class ADNode:
     >>> y1 = ADNode('d', 'install lock on the back door')
     """
 
-    def __init__(self, actor='a', label='NoName', refinement=None):
+    def __init__(self, actor="a", label="NoName", refinement=None):
         """
         initialize self.
 
@@ -34,8 +34,8 @@ class ADNode:
         super(ADNode, self).__init__()
         # check whether the parameters provided are OK.
         # actor
-        if actor not in ['a', 'd']:
-            print('Invalid actor: {}'.format(actor))
+        if actor not in ["a", "d"]:
+            print("Invalid actor: {}".format(actor))
             help(ADNode)
             return
         self.type = actor
@@ -43,17 +43,17 @@ class ADNode:
         try:
             self.label = str(label)
         except:
-            print('Invalid label.')
+            print("Invalid label.")
             help(ADNode)
             return
 
         # refinement
-        if refinement in ['AND', 'OR']:
+        if refinement in ["AND", "OR"]:
             self.ref = refinement
         elif refinement is None:
-            self.ref = ''
+            self.ref = ""
         else:
-            print('Invalid refinement: {}'.format(refinement))
+            print("Invalid refinement: {}".format(refinement))
             help(ADNode)
             return
 
@@ -68,9 +68,9 @@ class ADNode:
         True iff the node represents a basic action, i.e., if it is not
         refined.
         """
-        return self.ref == ''
+        return self.ref == ""
 
     def __repr__(self):
         if self.is_basic():
-            return '({}, {}, {})'.format(self.type, self.label, 'BS')
-        return '({}, {}, {})'.format(self.type, self.label, self.ref)
+            return "({}, {}, {})".format(self.type, self.label, "BS")
+        return "({}, {}, {})".format(self.type, self.label, self.ref)

@@ -9,7 +9,7 @@ from copy import deepcopy
 min_cost_attr = AttrDomain(min, sum, min, sum, 0, float("inf"))
 
 
-def measure_bu(T, ba):
+def measure_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     min_cost_attr.evaluate_bu(_T, _ba, True)
@@ -18,7 +18,7 @@ def measure_bu(T, ba):
     return time
 
 
-def measure_dummy_bu(T, ba):
+def measure_dummy_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     t = timeit.Timer(lambda: min_cost_attr.evaluate_dummy_bu(_T, _ba, False))
@@ -26,7 +26,7 @@ def measure_dummy_bu(T, ba):
     return time
 
 
-def measure_dummiest(T, ba):
+def measure_dummiest(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     t = timeit.Timer(lambda: min_cost_attr.evaluate_dummiest(_T, _ba, False))

@@ -1,6 +1,8 @@
 from adtrees.adnode import ADNode
 from xml.etree.cElementTree import parse
 
+from util.util import clean_tla_identifier
+
 
 def file_to_dict(path):
     """
@@ -52,7 +54,7 @@ def get_ad_node(et, pt):
     types = ["a", "d"]
 
     # the first child is the label, i.e., ETnode[0].tag = 'label'
-    label = et[0].text.replace("\n", " ")
+    label = clean_tla_identifier(et[0].text)
 
     # the first three children are either
     # label parameter
@@ -106,7 +108,7 @@ def get_basic_assignment_xml(path):
     while unvisited_et:
         current_et = unvisited_et[0]
         if len(list(current_et)) > 1 and current_et[1].tag == "parameter":
-            label = str(current_et[0].text).replace("\n", " ")
+            label = clean_tla_identifier(current_et[0].text)
             if label not in result:
                 val = current_et[1].text  # val most probably looks like "10.0"
                 result[label] = float(val)  # int(val.split('.')[0])

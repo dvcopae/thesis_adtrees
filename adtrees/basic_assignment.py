@@ -1,6 +1,8 @@
 from util.adtparser import get_basic_assignment_xml
 from copy import deepcopy
 
+from util.util import clean_tla_identifier
+
 
 def _from_xml(path):
     return get_basic_assignment_xml(path)
@@ -23,38 +25,41 @@ def _from_txt(path):
     """
     result = {}
     try:
-        with open(path, 'rt') as f:
+        with open(path, "rt") as f:
             line = f.readline()  # = 'label\tvalue\n'
-            while line != '' and line[0] == '#':
+            while line != "" and line[0] == "#":
                 line = f.readline()
             # the behaviour depends on whether the 'value' is a list (for Pareto domain) # or not
-            if '[' in line:
+            if "[" in line:
                 # we are dealing with the Pareto basic assignment.
                 # the lines are of the form 'label\t[[v1, v2, ..., vk]]\n'
-                while line != '':
-                    line_content = line.strip().split('\t')
-                    label = line_content[0]
-                    values = line_content[1][2:-2].split(', ')
+                while line != "":
+                    line_content = line.strip().split("\t")
+                    label = clean_tla_identifier(line_content[0])
+                    values = line_content[1][2:-2].split(", ")
                     value = [[float(i) for i in values]]
                     result[label] = value
                     # done, move to the next line.
                     line = f.readline()
-                    while line != '' and line[0] == '#':
+                    while line != "" and line[0] == "#":
                         line = f.readline()
             else:
                 # the lines are of the form 'label\tvalue\n'
-                while line != '':
-                    line_content = line.strip().split('\t')
-                    label = line_content[0]
+                while line != "":
+                    line_content = line.strip().split("\t")
+                    label = clean_tla_identifier(line_content[0])
                     value = float(line_content[1])
                     result[label] = value
                     # done, move to the next line.
                     line = f.readline()
-                    while line != '' and line[0] == '#':
+                    while line != "" and line[0] == "#":
                         line = f.readline()
     except FileNotFoundError:
         print(
-            "Couldn't load basic assignment from {}\n There is no such file or directory.".format(path))
+            "Couldn't load basic assignment from {}\n There is no such file or directory.".format(
+                path
+            )
+        )
     return result
 
 
@@ -79,10 +84,10 @@ class BasicAssignment:
         super(BasicAssignment, self).__init__()
 
         if isinstance(path, str):
-            if path[-4:] == '.xml':
+            if path[-4:] == ".xml":
                 # initialize from ADTool's .xml file
                 self.map = _from_xml(path)
-            elif path[-4:] == '.txt':
+            elif path[-4:] == ".txt":
                 # initialize from a .txt file
                 self.map = _from_txt(path)
         else:
@@ -114,8 +119,9 @@ class BasicAssignment:
         if str(label) in self:
             return self.map[str(label)]
         else:
-            print("The action '" + str(label) + "' is not assigned any value.")
-            return
+            raise ValueError(
+                "The action '" + str(label) + "' is not assigned any value."
+            )
 
     def output(self, name):
         """
@@ -130,23 +136,23 @@ class BasicAssignment:
         if isinstance(name, str):
             name = str(name)
         else:
-            print('The name should be a string, or convertible to string.')
+            print("The name should be a string, or convertible to string.")
             return
 
-        if name[-4:] != '.txt':
-            name += '.txt'
+        if name[-4:] != ".txt":
+            name += ".txt"
 
-        with open(name, 'w') as f:
+        with open(name, "w") as f:
             for label in self:
-                out_label = str(label).replace('\n', ' ')
-                f.write(out_label + '\t' + str(self[label]) + '\n')
+                out_label = str(label).replace("\n", " ")
+                f.write(out_label + "\t" + str(self[label]) + "\n")
         return
 
     def __eq__(self, other):
         return self.map == other.map
 
     def __repr__(self):
-        res = ''
+        res = ""
         for label in self.map:
-            res += str(label) + '\t' + str(self.map[label]) + '\n'
+            res += str(label) + "\t" + str(self.map[label]) + "\n"
         return res

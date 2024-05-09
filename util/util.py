@@ -1,4 +1,5 @@
 from operator import itemgetter
+import re
 
 
 def remove_dominated_pts(actor, points):
@@ -46,3 +47,17 @@ def remove_low_att_pts(actor, points):
         return [(k, v) for k, v in cost_dict.items()]
     else:
         return [(v, k) for k, v in cost_dict.items()]
+
+
+def clean_tla_identifier(identifier):
+    """
+    Clean and convert a string to a valid TLA+ identifier.
+    """
+    # Remove all non-alphanumeric characters and underscores
+    cleaned = re.sub(r"[^a-zA-Z0-9_]", "", identifier)
+
+    # If the cleaned string starts with a digit, prefix with an underscore
+    if cleaned and cleaned[0].isdigit():
+        cleaned = "_" + cleaned
+
+    return cleaned
