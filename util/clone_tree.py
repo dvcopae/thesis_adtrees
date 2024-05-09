@@ -28,7 +28,7 @@ def modify_labels(xml_path, output_path):
 
 def merge_trees(tree_path, tree_path_format):
     # Process each of the files from thesis_tree_6_1.xml to thesis_tree_6_9.xml
-    for j in range(0, 5):
+    for j in range(0, 8):
         # Load the original tree fresh for each modification
         original_tree = ET.parse(tree_path)
         original_root = original_tree.getroot()
@@ -68,7 +68,7 @@ def merge_trees(tree_path, tree_path_format):
 filePath = "./util/thesis_tree.xml"
 formatFile = filePath[:-4] + "_{i}" + ".xml"
 
-for i in range(5):
+for i in range(8):
     modify_labels(filePath, formatFile.format(i=i))
 
 merge_trees(filePath, formatFile)

@@ -36,12 +36,7 @@ def measure_dummiest(T: ADTree, ba: BasicAssignment) -> float:
 
 def run(method, filepath):
     T = ADTree(filepath)
-    tree_size = T.subtree_size()
-    defense_count = len(T.get_basic_actions("d"))
-    attack_count = len(T.get_basic_actions("a"))
-    print(
-        f"Tree size: {tree_size} (defenses: {defense_count}, attacks: {attack_count})"
-    )
+
     ba = BasicAssignment(filepath)
     if method == "dummiest":
         time = measure_dummiest(T, ba)
@@ -50,12 +45,12 @@ def run(method, filepath):
     elif method == "bu":
         time = measure_bu(T, ba)
 
-    return time, tree_size, defense_count, attack_count
+    return time
 
 
 if __name__ == "__main__":
     # for i in [6,12,18,24,30]:
-    #     time,_,_,_ = run('dummiest', f'./trees_w_assignments/thesis_tree_{i}.xml')
+    #     time,_,_,_ = run('dummiest', f'./trees_w_assignments/tree_{i}.xml')
     #     print(f'Time: {time} ms\n')
 
-    run("dummiest", "./trees_w_assignments/early_termination.xml")
+    run("dummiest", "./trees_w_assignments/tree_modified.xml")

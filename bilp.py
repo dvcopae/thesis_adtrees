@@ -278,7 +278,7 @@ def run(filepath):
 PRINT_PROGRESS = False
 
 
-def run_average(filepath, NO_RUNS=20):
+def run_average(filepath, NO_RUNS=10):
     warmup_bilp()
     return sum(run(filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
@@ -286,8 +286,8 @@ def run_average(filepath, NO_RUNS=20):
 if __name__ == "__main__":
     print("===== BILP =====\n")
 
-    # for i in [6, 12, 18, 24, 30, 36]:
-    #     filepath = f"./trees_w_assignments/thesis_tree_{i}.xml"
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
@@ -295,7 +295,8 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time = run_average("./trees_w_assignments/thesis_tree_36.xml")[0]
+    time, pf, _, _ = run("./trees_w_assignments/tree_48.xml")
+    print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    # cProfile.run('run(f"./trees_w_assignments/thesis_tree_24.xml")')
+    # cProfile.run('run(f"./trees_w_assignments/tree_24.xml")')
