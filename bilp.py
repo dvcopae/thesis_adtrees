@@ -281,11 +281,11 @@ def run(filepath):
 PRINT_PROGRESS = False
 
 if __name__ == "__main__":
-    for i in [6, 12, 18, 24, 30]:
-        time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
-        print(f"Time: {time} ms\n")
+    # for i in [6, 12, 18, 24, 30]:
+    #     time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
+    #     print(f"Time: {time} ms\n")
 
-    # time, _, _, _ = run(f"./trees_w_assignments/thesis_dag.xml")
-    # print(f"Time: {time} ms\n")
+    time, _, _, _ = run(f"./trees_w_assignments/thesis_tree_30.xml")
+    print(f"Time: {time} ms\n")
 
     # cProfile.run('run(f"./trees_w_assignments/thesis_tree_24.xml")')

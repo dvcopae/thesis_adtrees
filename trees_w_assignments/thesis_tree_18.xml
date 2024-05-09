@@ -73,8 +73,4 @@
     <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
     <tool>ADTool2</tool>
   </domain>
-  <domain id="MinCost1">
-    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
-    <tool>ADTool2</tool>
-  </domain>
 </adtree>

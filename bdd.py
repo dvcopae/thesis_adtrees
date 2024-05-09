@@ -91,7 +91,7 @@ def run(filepath, dump=False):
     start = timer()
 
     bdd = _bdd.BDD()
-    bdd.configure(reordering=True)
+    bdd.configure(reordering=False)
     bdd.declare(*(defenses + attacks))
     expr = T.get_boolean_expression()
     TREE = bdd.add_expr(expr)
@@ -125,9 +125,9 @@ def run(filepath, dump=False):
 PRINT_PROGRESS = False
 
 if __name__ == "__main__":
-    # for i in [6, 12, 18, 24, 30]:
-    #     time, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
-    #     print(f"Time: {time} ms\n")
+    for i in [6, 12, 18, 24, 30]:
+        time, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
+        print(f"Time: {time} ms\n")
 
-    time, _ = run("./trees_w_assignments/thesis_tree_24.xml")
-    print(f"Time: {time} ms\n")
+    # time, _ = run("./trees_w_assignments/thesis_tree_30.xml")
+    # print(f"Time: {time} ms\n")
