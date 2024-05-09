@@ -1,4 +1,6 @@
 import itertools
+import os
+import timeit
 from typing import List, Tuple
 import dd.bdd as _bdd
 
@@ -23,7 +25,42 @@ def _eval_path_cost(
     return (def_cost, att_cost)
 
 
-def compute_pf(
+def _sat_iter(bdd, u, path, goal):
+    """Recurse to enumerate models."""
+
+    # Complemented edge, swap goal
+    if u < 0:
+        goal = not goal
+
+    def path_to_var(pbdd, path):
+        return {bdd._level_to_var[i]: v for i, v in path.items()}
+
+    # terminal ?
+    if abs(u) == 1:
+        if goal:
+            yield path_to_var(bdd, path)
+        return
+
+    # non-terminal
+    i, v, w = bdd._succ[abs(u)]
+    if not v:
+        raise AssertionError(v)
+    if not w:
+        raise AssertionError(w)
+
+    path_u_false = dict(path)
+    path_u_false[i] = False
+
+    path_u_true = dict(path)
+    path_u_true[i] = True
+
+    for x in _sat_iter(bdd, v, path_u_false, goal):
+        yield x
+    for x in _sat_iter(bdd, w, path_u_true, goal):
+        yield x
+
+
+def compute_pf_all_paths(
     bdd: _bdd.BDD,
     root: ADNode,
     ba: BasicAssignment,
@@ -33,7 +70,7 @@ def compute_pf(
     pf_dict = {}
     all_paths = []
 
-    for c in bdd._sat_iter(root, dict(), True):
+    for c in _sat_iter(bdd, root, dict(), True):
         def_cost, att_cost = _eval_path_cost(c, ba, defenses, attacks)
 
         # Fill path with missing values
@@ -113,21 +150,30 @@ def run(filepath, dump=False):
     if PRINT_PROGRESS:
         print(f"Size after custom-order: {len(bdd)}")
 
-    pf = compute_pf(bdd, TREE, ba, defenses, attacks)
+    pf = compute_pf_all_paths(bdd, TREE, ba, defenses, attacks)
 
-    print(pf)
-
-    time = round((timer() - start) * 1000, 2)
+    time = timer() - start
 
     return time, pf
 
 
 PRINT_PROGRESS = False
 
-if __name__ == "__main__":
-    for i in [6, 12, 18, 24, 30]:
-        time, _ = run(f"./trees_w_assignments/thesis_tree_{i}.xml")
-        print(f"Time: {time} ms\n")
 
-    # time, _ = run("./trees_w_assignments/thesis_tree_30.xml")
-    # print(f"Time: {time} ms\n")
+def run_average(filepath, NO_RUNS=100):
+    return sum(run(filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
+
+
+if __name__ == "__main__":
+    print("===== BDD =====\n")
+    for i in [6, 12, 18, 24, 30, 36]:
+        filepath = f"./trees_w_assignments/thesis_tree_{i}.xml"
+        print(os.path.basename(filepath))
+
+        # Average time over `NO_RUNS`, excluding the time to read the tree
+        time = run_average(filepath)
+
+        print("Time: {:.2f} ms.\n".format(time * 1000))
+
+    time, _ = run_average("./trees_w_assignments/thesis_tree_36.xml")
+    print("Time: {:.2f} ms.\n".format(time * 1000))
