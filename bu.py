@@ -1,3 +1,4 @@
+import os
 import timeit
 
 from adtrees.adtree import ADTree
@@ -5,6 +6,7 @@ from adtrees.attribute_domain import AttrDomain
 from adtrees.basic_assignment import BasicAssignment
 from copy import deepcopy
 
+from timeit import default_timer as timer
 
 min_cost_attr = AttrDomain(min, sum, min, sum, 0, float("inf"))
 
@@ -12,26 +14,25 @@ min_cost_attr = AttrDomain(min, sum, min, sum, 0, float("inf"))
 def measure_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
-    min_cost_attr.evaluate_bu(_T, _ba, True)
-    t = timeit.Timer(lambda: min_cost_attr.evaluate_bu(_T, _ba, False))
-    time = round(t.timeit(50) / 50 * 1000, 2)
-    return time
+    start = timer()
+    pf = min_cost_attr.evaluate_bu(_T, _ba, False)
+    return timer() - start, pf
 
 
 def measure_dummy_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
-    t = timeit.Timer(lambda: min_cost_attr.evaluate_dummy_bu(_T, _ba, False))
-    time = round(t.timeit(1) / 1 * 1000, 2)
-    return time
+    start = timer()
+    pf = min_cost_attr.evaluate_dummy_bu(_T, _ba, False)
+    return timer() - start, pf
 
 
 def measure_dummiest(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
-    t = timeit.Timer(lambda: min_cost_attr.evaluate_dummiest(_T, _ba, False))
-    time = round(t.timeit(1) / 1 * 1000, 2)
-    return time
+    start = timer()
+    pf = min_cost_attr.evaluate_dummiest(_T, _ba, False)
+    return timer() - start, pf
 
 
 def run(method, filepath):
@@ -39,18 +40,29 @@ def run(method, filepath):
 
     ba = BasicAssignment(filepath)
     if method == "dummiest":
-        time = measure_dummiest(T, ba)
+        return measure_dummiest(T, ba)
     elif method == "dummy-bu":
-        time = measure_dummy_bu(T, ba)
+        return measure_dummy_bu(T, ba)
     elif method == "bu":
-        time = measure_bu(T, ba)
+        return measure_bu(T, ba)
 
-    return time
+
+def run_average(method, filepath, NO_RUNS=100):
+    return sum(run(method, filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
 
 if __name__ == "__main__":
-    # for i in [6,12,18,24,30]:
-    #     time,_,_,_ = run('dummiest', f'./trees_w_assignments/tree_{i}.xml')
-    #     print(f'Time: {time} ms\n')
+    for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+        filepath = f"./trees_w_assignments/tree_{i}.xml"
+        print(os.path.basename(filepath))
 
-    run("dummiest", "./trees_w_assignments/tree_modified.xml")
+        # Average time over `NO_RUNS`, excluding the time to read the tree
+        time = run_average("bu", filepath)
+        _, pf = run("bu", filepath)
+        print(pf)
+
+        print("Time: {:.2f} ms.\n".format(time * 1000))
+
+    # time, pf = run('bu', "./trees_w_assignments/tree_12.xml")
+    # print(pf)
+    # print("Time: {:.2f} ms.\n".format(time * 1000))

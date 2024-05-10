@@ -11,7 +11,7 @@ from colorama import Fore, init
 
 from timeit import default_timer as timer
 
-from util.util import remove_dominated_pts
+from util.util import remove_dominated_pts, remove_low_att_pts
 
 init(autoreset=True)
 
@@ -24,7 +24,62 @@ def _eval_path_cost(
     return (def_cost, att_cost)
 
 
-def find_paths_bdd(bdd, u, path={}, goal=True):
+pf_storage = {}
+
+
+def find_pareto_bu(
+    bdd: _bdd.BDD,
+    u,
+    defenses: List[str],
+    ba: BasicAssignment,
+    goal=True,
+):
+    # Avoid revisiting nodes
+    if u in pf_storage:
+        return pf_storage[u]
+
+    p = abs(u)
+
+    # Complemented edge, swap goal
+    if u < 0:
+        goal = not goal
+
+    # terminal ?
+    if p == 1:
+        return [(0, 0)] if goal else [(0, float("inf"))]
+
+    # non-terminal
+    i, v, w = bdd._succ[p]
+    if not v:
+        raise AssertionError(v)
+    if not w:
+        raise AssertionError(w)
+
+    pf_left = find_pareto_bu(bdd, v, defenses, ba, goal)
+    pf_right = find_pareto_bu(bdd, w, defenses, ba, goal)
+
+    # Taking a `right` edge means we activated `u`, so add it's cost
+    u_label = bdd._level_to_var[i]
+    is_defense = u_label in defenses
+
+    if is_defense:
+        pf_right = [(d + ba[u_label], a) for d, a in pf_right]
+    else:
+        pf_right = [(d, a + ba[u_label]) for d, a in pf_right]
+
+    pf = pf_left + pf_right
+
+    if is_defense:
+        pf = remove_low_att_pts("a", pf)
+
+    pf = remove_dominated_pts("a", pf)
+
+    pf_storage[u] = pf
+
+    return pf
+
+
+def find_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
     """Recurse to enumerate models."""
 
     p = abs(u)
@@ -149,7 +204,11 @@ def compute_pf_all_paths(
     return pf
 
 
-def run(filepath, dump=False):
+def run(filepath, method="bu", dump=False):
+    # reset pf_Storage for bdd_bu
+    global pf_storage
+    pf_storage = {}
+
     ba = BasicAssignment(filepath)
     T = ADTree(filepath)
     defenses = T.get_basic_actions("d")
@@ -176,7 +235,10 @@ def run(filepath, dump=False):
     if PRINT_PROGRESS:
         print(f"Size after custom-order: {len(bdd)}")
 
-    pf = compute_pf_all_paths(bdd, TREE, ba, defenses, attacks)
+    if method == "bu":
+        pf = find_pareto_bu(bdd, TREE, defenses, ba)
+    elif method == "all_paths":
+        pf = compute_pf_all_paths(bdd, TREE, ba, defenses, attacks)
 
     time = timer() - start
 
@@ -186,23 +248,23 @@ def run(filepath, dump=False):
 PRINT_PROGRESS = False
 
 
-def run_average(filepath, NO_RUNS=100):
-    return sum(run(filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
+def run_average(filepath, NO_RUNS=100, method="bu"):
+    return sum(run(filepath, method)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
-        filepath = f"./trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average(filepath)
-        _, pf = run(filepath)
-        print(pf)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average(filepath)
+    #     _, pf = run(filepath)
+    #     print(pf)
 
-        print("Time: {:.2f} ms.\n".format(time * 1000))
+    #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    # time, pf = run("./trees_w_assignments/tree_36.xml")
-    # print(pf)
-    # print("Time: {:.2f} ms.\n".format(time * 1000))
+    time, pf = run("./trees_w_assignments/rfid_dag_modified.xml", dump=False)
+    print(pf)
+    print("Time: {:.2f} ms.\n".format(time * 1000))

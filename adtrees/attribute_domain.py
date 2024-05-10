@@ -103,8 +103,6 @@ class AttrDomain:
         pts = remove_low_att_pts(T.root.type, pts)
         pts = remove_dominated_pts(T.root.type, pts)
 
-        print(pts)
-
         return pts
 
     def evaluate_dummy_bu(self, T: ADTree, ba: BasicAssignment, print_progress: True):
@@ -136,7 +134,6 @@ class AttrDomain:
                 + "## WARNING ##: The results are not correct since the tree is a DAG."
             )
 
-        print(pf)
         return pf
 
     def evaluate_bu(self, T: ADTree, ba: BasicAssignment, print_progress: True):
