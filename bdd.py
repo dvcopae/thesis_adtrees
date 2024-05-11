@@ -265,6 +265,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("./trees_w_assignments/rfid_dag_modified.xml", dump=False)
+    time, pf = run("./trees_w_assignments/tree_72.xml", method="bu", dump=False)
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))

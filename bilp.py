@@ -283,16 +283,16 @@ def run_average(filepath, NO_RUNS=10):
 if __name__ == "__main__":
     print("===== BILP =====\n")
 
-    for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
-        filepath = f"./trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average(filepath)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average(filepath)
 
-        print("Time: {:.2f} ms.\n".format(time * 1000))
+    #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf, _, _ = run("./trees_w_assignments/tree_48.xml")
+    time, pf, _, _ = run("./trees_w_assignments/tree_72.xml")
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))
 

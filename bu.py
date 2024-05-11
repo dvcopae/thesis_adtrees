@@ -52,17 +52,17 @@ def run_average(method, filepath, NO_RUNS=100):
 
 
 if __name__ == "__main__":
-    for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
-        filepath = f"./trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average("bu", filepath)
-        _, pf = run("bu", filepath)
-        print(pf)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average("bu", filepath)
+    #     _, pf = run("bu", filepath)
+    #     print(pf)
 
-        print("Time: {:.2f} ms.\n".format(time * 1000))
+    #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    # time, pf = run('bu', "./trees_w_assignments/tree_12.xml")
-    # print(pf)
-    # print("Time: {:.2f} ms.\n".format(time * 1000))
+    time, pf = run("dummiest", "./trees_w_assignments/tree_42.xml")
+    print(pf)
+    print("Time: {:.2f} ms.\n".format(time * 1000))
