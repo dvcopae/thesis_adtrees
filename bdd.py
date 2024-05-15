@@ -1,16 +1,12 @@
-import itertools
-import os
+from timeit import default_timer as timer
 from typing import List, Tuple
+
 import dd.bdd as _bdd
+from colorama import Fore, init
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-
-from colorama import Fore, init
-
-from timeit import default_timer as timer
-
 from util.util import remove_dominated_pts, remove_low_att_pts
 
 init(autoreset=True)
@@ -255,7 +251,7 @@ def run_average(filepath, NO_RUNS=100, method="bu"):
 if __name__ == "__main__":
     print("===== BDD =====\n")
     # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
-    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
+    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
@@ -265,6 +261,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("./trees_w_assignments/tree_72.xml", method="bu", dump=False)
+    time, pf = run("./data/trees_w_assignments/tree_72.xml", method="bu", dump=False)
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))

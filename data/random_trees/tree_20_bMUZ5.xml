@@ -1,0 +1,80 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>AND_1</label>
+    <node refinement="disjunctive">
+      <label>OR_2</label>
+      <node refinement="disjunctive">
+        <label>OR_3</label>
+        <node refinement="disjunctive">
+          <label>OR_4</label>
+          <node refinement="">
+            <label>BS_5</label>
+            <parameter domainId="MinCost1" category="basic">97061</parameter>
+          </node>
+          <node refinement="">
+            <label>BS_6</label>
+            <parameter domainId="MinCost1" category="basic">45324</parameter>
+          </node>
+          <node refinement="disjunctive">
+            <label>OR_7</label>
+            <node switchRole="yes" refinement="">
+              <label>BS_8</label>
+              <parameter domainId="MinCost1" category="basic">7844</parameter>
+            </node>
+            <node refinement="conjunctive">
+              <label>AND_9</label>
+              <node refinement="">
+                <label>BS_10</label>
+                <parameter domainId="MinCost1" category="basic">79999</parameter>
+              </node>
+              <node switchRole="yes" refinement="">
+                <label>BS_11</label>
+                <parameter domainId="MinCost1" category="basic">57461</parameter>
+              </node>
+              <node refinement="">
+                <label>BS_12</label>
+                <parameter domainId="MinCost1" category="basic">19157</parameter>
+              </node>
+              <node refinement="">
+                <label>BS_13</label>
+                <parameter domainId="MinCost1" category="basic">93193</parameter>
+              </node>
+            </node>
+            <node refinement="">
+              <label>BS_14</label>
+              <parameter domainId="MinCost1" category="basic">37360</parameter>
+            </node>
+            <node refinement="">
+              <label>BS_15</label>
+              <parameter domainId="MinCost1" category="basic">21382</parameter>
+            </node>
+          </node>
+        </node>
+        <node refinement="">
+          <label>BS_16</label>
+          <parameter domainId="MinCost1" category="basic">7059</parameter>
+        </node>
+        <node refinement="">
+          <label>BS_17</label>
+          <parameter domainId="MinCost1" category="basic">10453</parameter>
+        </node>
+      </node>
+      <node refinement="">
+        <label>BS_18</label>
+        <parameter domainId="MinCost1" category="basic">20534</parameter>
+      </node>
+      <node refinement="">
+        <label>BS_19</label>
+        <parameter domainId="MinCost1" category="basic">96013</parameter>
+      </node>
+    </node>
+    <node refinement="">
+      <label>BS_20</label>
+      <parameter domainId="MinCost1" category="basic">10313</parameter>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

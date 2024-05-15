@@ -1,4 +1,5 @@
 import csv
+
 import matplotlib.pyplot as plt
 
 
@@ -11,10 +12,12 @@ def plot(_x, _y, label):
             txt = f"{round(y, 2)} ms."
         elif y < 60000:
             txt = f"{round(y / 1000, 2)} s."
-        else:
+        elif y < 3.6e6:
             txt = f"{round(y / 60000, 2)} m."
+        else:
+            txt = f"{round(y/ 3.6e+6, 2)} h."
 
-        plt.annotate(txt, (_x[i], y))
+        plt.annotate(txt, (_x[i], y), textcoords="offset points", xytext=(0, -13))
 
 
 def read_results_from_csv(file_path):
@@ -65,6 +68,6 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
 
 if __name__ == "__main__":
     x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values = (
-        read_results_from_csv("./benchmarks/algorithm_results.csv")
+        read_results_from_csv("./benchmarks/algorithm_results_linear.csv")
     )
     plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values)

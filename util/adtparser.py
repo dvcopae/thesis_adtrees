@@ -1,6 +1,6 @@
-from adtrees.adnode import ADNode
 from xml.etree.cElementTree import parse
 
+from adtrees.adnode import ADNode
 from util.util import clean_tla_identifier
 
 

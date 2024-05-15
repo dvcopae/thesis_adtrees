@@ -1,6 +1,6 @@
-from util.adtparser import get_basic_assignment_xml
 from copy import deepcopy
 
+from util.adtparser import get_basic_assignment_xml
 from util.util import clean_tla_identifier
 
 

@@ -1,5 +1,7 @@
-from operator import itemgetter
 import re
+import secrets
+import string
+from operator import itemgetter
 
 
 def remove_dominated_pts(actor, points):
@@ -61,3 +63,9 @@ def clean_tla_identifier(identifier):
         cleaned = "_" + cleaned
 
     return cleaned
+
+
+def generate_random_string(length=10):
+    # Generate a random string of fixed length
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))

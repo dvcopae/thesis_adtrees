@@ -1,26 +1,18 @@
-from concurrent.futures import ProcessPoolExecutor
-import matplotlib.pyplot as plt
 import csv
+from concurrent.futures import ProcessPoolExecutor
+from os import listdir
+from os.path import isfile, join
 
 from adtrees.adtree import ADTree
-from bu import run_average as run_bu
-from bilp import run_average as run_bilp
 from bdd import run_average as run_bdd
-
-x = [6, 12, 18, 24, 30, 36, 42, 48]
-dummy_x = [i for i in x if i <= 36]
-
-x_labels = []
-dummiest_values = []
-bilp_values = []
-bdd_bu_values = []
-bdd_all_values = []
+from bilp import run_average as run_bilp
+from bu import run_average as run_bu
 
 
 def save_results_to_csv(
     x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values
 ):
-    with open("./benchmarks/algorithm_results.csv", "w", newline="") as file:
+    with open("./benchmarking/algorithm_results.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
             ["Tree Size(Defenses)", "Dummiest", "BILP", "BDD-BU", "BDD-ALL"]
@@ -38,46 +30,68 @@ def save_results_to_csv(
             )
 
 
-def eval_dummiest(i):
-    time = run_bu("dummiest", f"./trees_w_assignments/tree_{i}.xml", 1)
-    print(f"Dummiest - finished {i}")
+def eval_dummiest(file):
+    time = run_bu("dummiest", file, 1)
+    print(f"Dummiest - finished {file}")
     return round(time * 1000, 2)
 
 
-def eval_bilp(i):
-    time = run_bilp(f"./trees_w_assignments/tree_{i}.xml", 1)
-    print(f"BILP - finished {i}")
+def eval_bilp(file):
+    time = run_bilp(file, 1)
+    print(f"BILP - finished {file}")
     return round(time * 1000, 2)
 
 
-def eval_bdd_bu(i):
-    time = run_bdd(f"./trees_w_assignments/tree_{i}.xml", 50, "bu")
-    print(f"BDD-BU - finished {i}")
+def eval_bdd_bu(file):
+    time = run_bdd(file, 50, "bu")
+    print(f"BDD-BU - finished {file}")
     return round(time * 1000, 2)
 
 
-def eval_bdd_all(i):
-    time = run_bdd(f"./trees_w_assignments/tree_{i}.xml", 50, "all_paths")
-    print(f"BDD-ALL - finished {i}")
+def eval_bdd_all(file):
+    time = run_bdd(file, 50, "all_paths")
+    print(f"BDD-ALL - finished {file}")
     return round(time * 1000, 2)
 
 
 if __name__ == "__main__":
+    tree_linear_files = [
+        f"./data/trees_w_assignments/tree_{i}.xml"
+        for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72]
+    ]
+    dummy_x = [
+        f"./data/trees_w_assignments/tree_{i}.xml" for i in [6, 12, 18, 24, 30, 36]
+    ]
+
+    random_tree_files = [
+        join("./data/random_trees/", f)
+        for f in listdir("./data/random_trees/")
+        if isfile(join("./data/random_trees/", f))
+    ]
+
+    files = random_tree_files
+
+    x_labels = []
+    dummiest_values = []
+    bilp_values = []
+    bdd_bu_values = []
+    bdd_all_values = []
+
     with ProcessPoolExecutor() as executor:
         # Collect dummiest values and x_labels using parallel execution
-        dummiest_values = list(executor.map(eval_dummiest, dummy_x))
+        dummiest_values = list(executor.map(eval_dummiest, files))
 
         # Collect bilp values
-        bilp_values = list(executor.map(eval_bilp, x))
+        bilp_values = list(executor.map(eval_bilp, files))
 
         # Collect bdd values
-        bdd_bu_values = list(executor.map(eval_bdd_bu, x))
+        bdd_bu_values = list(executor.map(eval_bdd_bu, files))
 
         # Collect bdd values
-        bdd_all_values = list(executor.map(eval_bdd_all, x))
+        bdd_all_values = list(executor.map(eval_bdd_all, files))
 
-    for i in x:
-        T = ADTree(f"./trees_w_assignments/tree_{i}.xml")
+    for f in files:
+        T = ADTree(f)
         tree_size = T.subtree_size()
         defense_count = len(T.get_basic_actions("d"))
         x_labels.append(f"{tree_size}({defense_count})")

@@ -1,12 +1,9 @@
-import os
-import timeit
+from copy import deepcopy
+from timeit import default_timer as timer
 
 from adtrees.adtree import ADTree
 from adtrees.attribute_domain import AttrDomain
 from adtrees.basic_assignment import BasicAssignment
-from copy import deepcopy
-
-from timeit import default_timer as timer
 
 min_cost_attr = AttrDomain(min, sum, min, sum, 0, float("inf"))
 
@@ -53,7 +50,7 @@ def run_average(method, filepath, NO_RUNS=100):
 
 if __name__ == "__main__":
     # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
-    #     filepath = f"./trees_w_assignments/tree_{i}.xml"
+    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
@@ -63,6 +60,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("dummiest", "./trees_w_assignments/tree_42.xml")
+    time, pf = run("dummiest", "./data/trees_w_assignments/tree_42.xml")
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))

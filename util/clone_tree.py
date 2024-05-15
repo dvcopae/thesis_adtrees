@@ -1,14 +1,8 @@
 import os.path
-import xml.etree.ElementTree as ET
-import secrets
-import string
 import random
+import xml.etree.ElementTree as ET
 
-
-def generate_random_string(length=10):
-    # Generate a random string of fixed length
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+from util.util import generate_random_string
 
 
 def modify_labels(xml_path, output_path):

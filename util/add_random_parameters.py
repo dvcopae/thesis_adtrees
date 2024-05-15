@@ -1,8 +1,6 @@
 import os
-import sys
-import xml.etree.ElementTree as ET
 import random
-import numpy as np
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -44,7 +42,9 @@ def add_values_to_basic_events(file_path):
 
     ET.indent(tree, space="  ", level=0)
     tree.write(
-        os.path.join("./trees_w_assignments", Path(file_path).stem + "_modified.xml")
+        os.path.join(
+            "./data/trees_w_assignments", Path(file_path).stem + "_modified.xml"
+        )
     )
 
 
