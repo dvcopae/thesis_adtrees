@@ -1,6 +1,6 @@
-import csv
-
 import matplotlib.pyplot as plt
+
+from util.util import read_results_from_csv
 
 
 def plot(_x, _y, label):
@@ -18,32 +18,6 @@ def plot(_x, _y, label):
             txt = f"{round(y/ 3.6e+6, 2)} h."
 
         plt.annotate(txt, (_x[i], y), textcoords="offset points", xytext=(0, -13))
-
-
-def read_results_from_csv(file_path):
-    x_labels = []
-    dummiest_values = []
-    bilp_values = []
-    bdd_bu_values = []
-    bdd_all_values = []
-    with open(file_path, "r") as file:
-        reader = csv.reader(file)
-        next(reader)  # Skip the header row
-        for row in reader:
-            x_labels.append(row[0])
-            if row[1] != "":
-                dummiest_values.append(float(row[1]))
-
-            if row[2] != "":
-                bilp_values.append(float(row[2]))
-
-            if row[3] != "":
-                bdd_bu_values.append(float(row[3]))
-
-            if row[4] != "":
-                bdd_all_values.append(float(row[4]))
-
-    return x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values
 
 
 def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values):
@@ -68,6 +42,6 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
 
 if __name__ == "__main__":
     x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values = (
-        read_results_from_csv("./benchmarks/algorithm_results_linear.csv")
+        read_results_from_csv("./benchmarking/algorithm_results_linear.csv")
     )
     plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values)

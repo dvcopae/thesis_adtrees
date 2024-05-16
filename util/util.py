@@ -1,3 +1,4 @@
+import csv
 import re
 import secrets
 import string
@@ -69,3 +70,29 @@ def generate_random_string(length=10):
     # Generate a random string of fixed length
     alphabet = string.ascii_letters + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def read_results_from_csv(file_path):
+    x_labels = []
+    dummiest_values = []
+    bilp_values = []
+    bdd_bu_values = []
+    bdd_all_values = []
+    with open(file_path, "r") as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header row
+        for row in reader:
+            x_labels.append(row[0])
+            if row[1] != "":
+                dummiest_values.append(float(row[1]))
+
+            if row[2] != "":
+                bilp_values.append(float(row[2]))
+
+            if row[3] != "":
+                bdd_bu_values.append(float(row[3]))
+
+            if row[4] != "":
+                bdd_all_values.append(float(row[4]))
+
+    return x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values

@@ -4,6 +4,7 @@ from os import listdir
 from os.path import isfile, join
 
 from adtrees.adtree import ADTree
+from adtrees.basic_assignment import BasicAssignment
 from bdd import run_average as run_bdd
 from bilp import run_average as run_bilp
 from bu import run_average as run_bu
@@ -23,9 +24,9 @@ def save_results_to_csv(
                 [
                     x_labels[i],
                     dummiest_values[i] if i < len(dummiest_values) else None,
-                    bilp_values[i],
-                    bdd_bu_values[i],
-                    bdd_all_values[i],
+                    bilp_values[i] if i < len(bilp_values) else None,
+                    bdd_bu_values[i] if i < len(bdd_bu_values) else None,
+                    bdd_all_values[i] if i < len(bdd_all_values) else None,
                 ]
             )
 
@@ -63,10 +64,11 @@ if __name__ == "__main__":
         f"./data/trees_w_assignments/tree_{i}.xml" for i in [6, 12, 18, 24, 30, 36]
     ]
 
+    random_trees_path = "./data/random_trees/"
     random_tree_files = [
-        join("./data/random_trees/", f)
-        for f in listdir("./data/random_trees/")
-        if isfile(join("./data/random_trees/", f))
+        join(random_trees_path, f)
+        for f in listdir(random_trees_path)
+        if isfile(join(random_trees_path, f))
     ]
 
     files = random_tree_files
@@ -79,7 +81,7 @@ if __name__ == "__main__":
 
     with ProcessPoolExecutor() as executor:
         # Collect dummiest values and x_labels using parallel execution
-        dummiest_values = list(executor.map(eval_dummiest, files))
+        # dummiest_values = list(executor.map(eval_dummiest, files))
 
         # Collect bilp values
         bilp_values = list(executor.map(eval_bilp, files))
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         bdd_bu_values = list(executor.map(eval_bdd_bu, files))
 
         # Collect bdd values
-        bdd_all_values = list(executor.map(eval_bdd_all, files))
+        # bdd_all_values = list(executor.map(eval_bdd_all, files))
 
     for f in files:
         T = ADTree(f)
