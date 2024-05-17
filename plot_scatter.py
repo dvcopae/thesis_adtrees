@@ -1,49 +1,73 @@
 from pathlib import Path
+from matplotlib import patches
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from utils.util import read_results_from_csv
+
+
+def size_to_color(n):
+    return n // 20
 
 
 def plot_results(x_labels, x, y, output):
     plt.yscale("log")
     plt.xscale("log")
 
-    axis_upper_limit = max(x + y)
-    axis_lower_limit = min(x + y)
+    # First 5 colors of the `plasma` colormap
+    color_mapping = {
+        0: [0.050383, 0.029803, 0.527975, 1.0],
+        1: [4.17642e-01, 5.64000e-04, 6.58390e-01, 1.00000e00],
+        2: [0.69284, 0.165141, 0.564522, 1.0],
+        3: [0.881443, 0.392529, 0.383229, 1.0],
+        4: [0.98826, 0.652325, 0.211364, 1.0],
+        5: [0.940015, 0.975158, 0.131326, 1.0],
+    }
 
-    colors = [int(l.partition("(")[0]) for l in x_labels]
-    sizes = [c * 2 for c in colors]
+    # Apply colors based on size categories
+    colors = [color_mapping[size_to_color(int(l.partition("(")[0]))] for l in x_labels]
 
-    # Add some padding
-    axis_lower_limit = axis_lower_limit * 0.8
-    axis_upper_limit = axis_upper_limit * 1.2
+    lower_limit = 10**-2.5
+    upper_limit = 10**6.5
 
-    plt.xlim(axis_lower_limit, axis_upper_limit)
-    plt.ylim(axis_lower_limit, axis_upper_limit)
+    plt.xlim(lower_limit, upper_limit)
+    plt.ylim(lower_limit, upper_limit)
 
-    plt.xlabel("bdd runtime (ms)")
-    plt.ylabel("dummiest runtime (ms)")
-    plt.scatter(x, y, c=colors, s=sizes, cmap="winter")
+    plt.xlabel(f"{output.split('_')[1]} runtime (ms)")
+    plt.ylabel(f"{output.split('_')[2]} runtime (ms)")
 
-    diagonal_x = numpy.linspace(axis_lower_limit, axis_upper_limit, 100)
+    plt.scatter(x, y, c=colors, marker="x")
+
+    diagonal_x = numpy.linspace(lower_limit, upper_limit, 100)
     diagonal_y = diagonal_x
 
     plt.plot(diagonal_x, diagonal_y, color="black", linewidth=1)
 
-    # mymodel = numpy.poly1d(numpy.polyfit(x, y, 2))
-    # myline = numpy.linspace(min(x + y), max(x + y), 500)
-    # plt.plot(myline, mymodel(myline), color="red")
+    legend_elements = [
+        patches.Patch(facecolor=color_mapping[i], label=f"< {i * 20}")
+        for i in range(len(color_mapping))
+    ]
+    legend = plt.legend(
+        handles=legend_elements,
+        fontsize="small",
+        loc="lower right",
+        title="Tree size",
+        fancybox=True,
+    )
 
-    clb = plt.colorbar()
-    clb.ax.set_title("Tree size")
+    frame = legend.get_frame()  # sets up for color, edge, and transparency
+    frame.set_facecolor("#E5E4E2")  # color of legend
+    frame.set_edgecolor("black")  # edge color of legend
+    frame.set_alpha(1)  # deals with transparency
 
     plt.tight_layout()
     plt.savefig(f"{output}.png")
 
 
 if __name__ == "__main__":
-    filename = "./benchmarking/algorithm_bdd_dummy.csv"
+    filename = "./benchmarking/algorithm_bdd_bu.csv"
     output = Path(filename).stem
     output = (
         "plot_" + output[output.index("_") + 1 :]
