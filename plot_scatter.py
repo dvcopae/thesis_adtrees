@@ -46,7 +46,7 @@ def plot_results(x_labels, x, y, output):
     plt.plot(diagonal_x, diagonal_y, color="black", linewidth=1)
 
     legend_elements = [
-        patches.Patch(facecolor=color_mapping[i], label=f"< {i * 20}")
+        patches.Patch(facecolor=color_mapping[i], label=f"< {(i+1) * 20}")
         for i in range(len(color_mapping))
     ]
     legend = plt.legend(
@@ -64,17 +64,29 @@ def plot_results(x_labels, x, y, output):
 
     plt.tight_layout()
     plt.savefig(f"{output}.png")
+    plt.clf()
 
 
 if __name__ == "__main__":
+
+    def get_plot_filename(f):
+        output = Path(f).stem
+        output = (
+            "plot_" + output[output.index("_") + 1 :]
+        )  # get everything after the first _
+        return output
+
+    # BDD <-> BILP
+    filename = "./benchmarking/algorithm_bdd_bilp.csv"
+    x_labels, _, bilp_values, bdd_bu_values, _ = read_results_from_csv(filename)
+    plot_results(x_labels, bdd_bu_values, bilp_values, get_plot_filename(filename))
+
+    # BDD <-> BU
     filename = "./benchmarking/algorithm_bdd_bu.csv"
-    output = Path(filename).stem
-    output = (
-        "plot_" + output[output.index("_") + 1 :]
-    )  # get everything after the first _
+    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(filename)
+    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(filename))
 
-    x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values = (
-        read_results_from_csv(filename)
-    )
-
-    plot_results(x_labels, bdd_bu_values, dummiest_values, output)
+    # BDD <-> dummiest
+    filename = "./benchmarking/algorithm_bdd_dummy.csv"
+    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(filename)
+    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(filename))
