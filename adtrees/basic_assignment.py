@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from util.adtparser import get_basic_assignment_xml
-from util.util import clean_tla_identifier
+from utils.adtparser import get_basic_assignment_xml
+from utils.util import clean_tla_identifier
 
 
 def _from_xml(path):

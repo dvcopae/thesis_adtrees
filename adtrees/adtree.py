@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from adtrees.adnode import ADNode
-from util.adtparser import file_to_dict
+from utils.adtparser import file_to_dict
 
 
 class ADTree:

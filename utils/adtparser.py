@@ -1,7 +1,7 @@
 from xml.etree.cElementTree import parse
 
 from adtrees.adnode import ADNode
-from util.util import clean_tla_identifier
+from utils.util import clean_tla_identifier
 
 
 def file_to_dict(path):

@@ -5,7 +5,7 @@ from colorama import Fore, init
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from util.util import remove_dominated_pts, remove_low_att_pts
+from utils.util import remove_dominated_pts, remove_low_att_pts
 
 init(autoreset=True)
 

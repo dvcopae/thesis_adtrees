@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from util.util import read_results_from_csv
+from utils.util import read_results_from_csv
 
 
 def plot(_x, _y, label):
@@ -21,7 +21,7 @@ def plot(_x, _y, label):
 
 
 def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values):
-    plt.figure(figsize=(16, 9))
+    plt.figure(figsize=(14, 4.5))
 
     plt.yscale("log")
     plt.xlabel("Tree size(defenses)")
@@ -31,17 +31,15 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
 
     plot(range(min(len(x_labels), len(dummiest_values))), dummiest_values, "dummiest")
     plot(range(min(len(x_labels), len(bilp_values))), bilp_values, "bilp")
-    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd_bu")
-    plot(range(min(len(x_labels), len(bdd_all_values))), bdd_all_values, "bdd_all")
+    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd")
 
     plt.legend(loc="best")
     plt.tight_layout()
-    # plt.show()
     plt.savefig("benchmark.png")
 
 
 if __name__ == "__main__":
     x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values = (
-        read_results_from_csv("./benchmarking/algorithm_results_linear.csv")
+        read_results_from_csv("./benchmarking/algorithm_linear.csv")
     )
     plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values)

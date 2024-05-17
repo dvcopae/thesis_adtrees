@@ -58,7 +58,7 @@ def eval_bdd_all(file):
 if __name__ == "__main__":
     tree_linear_files = [
         f"./data/trees_w_assignments/tree_{i}.xml"
-        for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72]
+        for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 86, 98, 110]
     ]
     dummy_x = [
         f"./data/trees_w_assignments/tree_{i}.xml" for i in [6, 12, 18, 24, 30, 36]
@@ -81,10 +81,10 @@ if __name__ == "__main__":
 
     with ProcessPoolExecutor() as executor:
         # Collect dummiest values and x_labels using parallel execution
-        # dummiest_values = list(executor.map(eval_dummiest, files))
+        dummiest_values = list(executor.map(eval_dummiest, files))
 
         # Collect bilp values
-        bilp_values = list(executor.map(eval_bilp, files))
+        # bilp_values = list(executor.map(eval_bilp, files))
 
         # Collect bdd values
         bdd_bu_values = list(executor.map(eval_bdd_bu, files))

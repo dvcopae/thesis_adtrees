@@ -1,9 +1,8 @@
 import random
 import xml.etree.ElementTree as ET
-
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from util.util import generate_random_string
+from utils.util import generate_random_string
 
 
 def create_tree(max_nodes):
@@ -114,7 +113,7 @@ def create_tree(max_nodes):
 
 
 if __name__ == "__main__":
-    for i in range(4, 75):
-        # Do each max_nodes 3 times
-        for _ in range(4):
+    for i in range(4, 40):
+        # Do each max_nodes 4 times
+        for _ in range(3):
             create_tree(max_nodes=i)

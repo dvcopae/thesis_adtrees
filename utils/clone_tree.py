@@ -1,8 +1,10 @@
 import os.path
 import random
+import shutil
 import xml.etree.ElementTree as ET
 
-from util.util import generate_random_string
+from util import generate_random_string
+from add_random_parameters import add_values_to_basic_events
 
 
 def modify_labels(xml_path, output_path):
@@ -21,8 +23,7 @@ def modify_labels(xml_path, output_path):
 
 
 def merge_trees(tree_path, tree_path_format):
-    # Process each of the files from thesis_tree_6_1.xml to thesis_tree_6_9.xml
-    for j in range(0, 11):
+    for j in range(0, N):
         # Load the original tree fresh for each modification
         original_tree = ET.parse(tree_path)
         original_root = original_tree.getroot()
@@ -59,10 +60,20 @@ def merge_trees(tree_path, tree_path_format):
         os.remove(tree_path_format.format(i=j))
 
 
-filePath = "./util/thesis_tree.xml"
-formatFile = filePath[:-4] + "_{i}" + ".xml"
+if __name__ == "__main__":
+    inFilePath = "./data/trees/thesis_tree.xml"
+    outFilePath = "./utils/thesis_tree.xml"
+    formatFile = outFilePath[:-4] + "_{i}" + ".xml"
 
-for i in range(11):
-    modify_labels(filePath, formatFile.format(i=i))
+    shutil.copyfile(inFilePath, outFilePath)
 
-merge_trees(filePath, formatFile)
+    N = 17
+
+    for i in range(N):
+        modify_labels(inFilePath, formatFile.format(i=i))
+
+    merge_trees(outFilePath, formatFile)
+
+    add_values_to_basic_events(outFilePath)
+
+    os.remove(outFilePath)

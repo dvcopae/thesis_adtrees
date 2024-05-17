@@ -48,4 +48,5 @@ def add_values_to_basic_events(file_path):
     )
 
 
-add_values_to_basic_events("./util//thesis_tree.xml")
+if __name__ == "__main__":
+    add_values_to_basic_events("./util/thesis_tree.xml")
