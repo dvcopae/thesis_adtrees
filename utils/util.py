@@ -5,18 +5,15 @@ import string
 from operator import itemgetter
 
 
-def remove_dominated_pts(actor, points):
+def remove_dominated_pts(points):
     """
     Remove all dominated points (not better in both dimensions)
     """
     if not points:
         return []
 
-    # If actor = 'a', sort first based on attack, and then on defense.
     # If actor = 'd', sort first based on defense, and then on attack.
-    primary_index = 0 if actor == "d" else 1
-    secondary_index = 1 - primary_index
-    sorted_points = sorted(points, key=itemgetter(primary_index, secondary_index))
+    sorted_points = sorted(points, key=itemgetter(0, 1))
 
     pareto_front = [sorted_points[0]]
 

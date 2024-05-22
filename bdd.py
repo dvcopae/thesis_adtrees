@@ -2,7 +2,7 @@ import itertools
 import os
 import re
 from timeit import default_timer as timer
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import dd.bdd as _bdd
 from colorama import Fore, init
@@ -16,23 +16,23 @@ init(autoreset=True)
 
 
 def _eval_path_cost(
-    path: dict, ba: BasicAssignment, defenses: List[str], attacks: List[str]
+    path: Dict[str, bool], ba: BasicAssignment, defenses: List[str], attacks: List[str]
 ) -> Tuple[float, float]:
     def_cost = sum([ba[d] for d in defenses if d in path and path[d]])
     att_cost = sum([ba[a] for a in attacks if a in path and path[a]])
-    return (def_cost, att_cost)
+    return def_cost, att_cost
 
 
 pf_storage = {}
 
 
-def find_pareto_bu(
+def compute_pf_bu(
     bdd: _bdd.BDD,
-    u,
+    u: int,
     defenses: List[str],
     ba: BasicAssignment,
-    goal=True,
-):
+    goal: bool = True,
+) -> List[Tuple[float, float]]:
     # Avoid revisiting nodes
     if u in pf_storage:
         return pf_storage[u]
@@ -49,13 +49,10 @@ def find_pareto_bu(
 
     # non-terminal
     i, v, w = bdd._succ[p]
-    if not v:
-        raise AssertionError(v)
-    if not w:
-        raise AssertionError(w)
+    assert v and w, "Invalid BDD structure"
 
-    pf_left = find_pareto_bu(bdd, v, defenses, ba, goal)
-    pf_right = find_pareto_bu(bdd, w, defenses, ba, goal)
+    pf_left = compute_pf_bu(bdd, v, defenses, ba, goal)
+    pf_right = compute_pf_bu(bdd, w, defenses, ba, goal)
 
     # Taking a `right` edge means we activated `u`, so add it's cost
     u_label = bdd._level_to_var[i]
@@ -71,15 +68,18 @@ def find_pareto_bu(
     if is_defense:
         pf = remove_low_att_pts(pf)
 
-    pf = remove_dominated_pts("a", pf)
-
+    pf = remove_dominated_pts(pf)
     pf_storage[u] = pf
 
     return pf
 
 
-def find_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
+failed_paths = []
+
+
+def find_all_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
     """Recurse to enumerate models."""
+    global failed_paths
 
     p = abs(u)
 
@@ -89,16 +89,16 @@ def find_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
 
     # terminal ?
     if p == 1:
+        path_dict = {bdd._level_to_var[i]: v for i, v in path.items()}
         if goal:
-            yield {bdd._level_to_var[i]: v for i, v in path.items()}
+            yield path_dict
+        else:
+            failed_paths.append(path_dict)
         return
 
     # non-terminal
     i, v, w = bdd._succ[p]
-    if not v:
-        raise AssertionError(v)
-    if not w:
-        raise AssertionError(w)
+    assert v and w, "Invalid BDD structure"
 
     path_u_false = dict(path)
     path_u_false[i] = False
@@ -106,10 +106,8 @@ def find_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
     path_u_true = dict(path)
     path_u_true[i] = True
 
-    for x in find_paths_bdd(bdd, v, path_u_false, goal):
-        yield x
-    for x in find_paths_bdd(bdd, w, path_u_true, goal):
-        yield x
+    yield from find_all_paths_bdd(bdd, v, path_u_false, goal)
+    yield from find_all_paths_bdd(bdd, w, path_u_true, goal)
 
 
 def compute_pf_all_paths(
@@ -118,29 +116,17 @@ def compute_pf_all_paths(
     ba: BasicAssignment,
     defenses: List[str],
     attacks: List[str],
-) -> List[float]:
+) -> List[Tuple[float, float]]:
+    global failed_paths
     pf_dict = {}
-    all_paths = []
-    defense_vecs_passed = set()
+    failed_paths = []
 
-    for c in find_paths_bdd(bdd, root):
+    for c in find_all_paths_bdd(bdd, root):
         def_cost, att_cost = _eval_path_cost(c, ba, defenses, attacks)
 
         # Fill path with missing defenses, and keep track of which defense configurations we encountered
-        # def_in_path = tuple()
-        for d in defenses:
-            if d not in c:
-                c[d] = False
-            # elif c[d]:
-            #    def_in_path = def_in_path + (d, ) 
-        
-        # Fill path with missing attacks
-        for a in attacks:
-            if a not in c:
-                c[a] = False
-
-        all_paths.append(c)
-        # defense_vecs_passed.add(def_in_path)
+        for s in defenses + attacks:
+            c.setdefault(s, False)
 
         prev_path = pf_dict.get(def_cost)
         if prev_path:
@@ -149,10 +135,9 @@ def compute_pf_all_paths(
                 if att_cost < prev_att_cost:
                     # We have the same defense vector as the current solution -> MINIMIZE att_cost
                     pf_dict[def_cost] = c
-            else:
+            elif att_cost > prev_att_cost:
                 # We found another defense vector which has the same def_cost -> MAXIMIZE att_cost
-                if att_cost > prev_att_cost:
-                    pf_dict[def_cost] = c
+                pf_dict[def_cost] = c
         else:
             # Value not in dict, add it
             pf_dict[def_cost] = c
@@ -160,67 +145,19 @@ def compute_pf_all_paths(
         if PRINT_PROGRESS:
             print(Fore.GREEN + f"{(def_cost, att_cost)} {c}")
 
-    pf_dict_paths = pf_dict.values()
+    pf = [_eval_path_cost(c, ba, defenses, attacks) for c in pf_dict.values()]
 
-    pf = [_eval_path_cost(c, ba, defenses, attacks) for c in pf_dict_paths]
-
-    # Add infty costs - EXPENSIVE
-    # infinities = []
-    # for def_vector in itertools.product([False, True], repeat=len(defenses)):
-    #     def_dict = dict(zip(defenses, def_vector))
-    #     vector_defs = tuple([k for k,v in def_dict.items() if k in defenses and v])
-        
-    #     # Check if `def_dict` is not found as a solution
-    #     if not any(
-    #         all(path[key] == value for key, value in def_dict.items())
-    #         for path in all_paths
-    #     ):
-    #         def_cost = sum([ba[defense] for defense in vector_defs])
-    #         if PRINT_PROGRESS:
-    #             print(Fore.YELLOW + f"{(def_cost, float("inf"))} {def_dict}")
-    #         infinities.append((def_cost, float("inf")))
-
-    # # We are only interested in the minimum defense cost which produces infinity            
-    # pf.extend(remove_high_def_pts(infinities))
-    
-    # print(f"ini: {pf}")
-    print(f"def: {remove_dominated_pts("d", pf)}")
-    print(f"att: {remove_dominated_pts("a", pf)}")
+    # If a path fails and it doesn't pass any attacks, then it must block all attacks
+    infinity_paths = [p for p in failed_paths if not any(k in attacks for k in p)]
+    infinity_costs = [
+        (_eval_path_cost(p, ba, defenses, attacks)[0], float("inf"))
+        for p in infinity_paths
+    ]
+    pf.extend(remove_high_def_pts(infinity_costs))
 
     pf = remove_low_att_pts(pf)
-    pf = remove_dominated_pts("d", pf)
-
+    pf = remove_dominated_pts(pf)
     return pf
-
-
-def extract_order(formula, variables):
-    order = []
-    for var in variables:
-        match = re.search(r"\b" + re.escape(var) + r"\b", formula)
-        if match:
-            order.append((match.start(), var))
-    order.sort()
-    return [var for _, var in order]
-
-
-def create_mapping(formula, defenses, attacks):
-    # Extract the order of appearance for defenses and attacks
-    defense_order = extract_order(formula, defenses)
-    attack_order = extract_order(formula, attacks)
-
-    # Create the dictionary with defenses first, followed by attacks
-    mapping = {}
-    index = 0
-
-    for defense in defense_order + [d for d in defenses if d not in defense_order]:
-        mapping[defense] = index
-        index += 1
-
-    for attack in attack_order + [a for a in attacks if a not in attack_order]:
-        mapping[attack] = index
-        index += 1
-
-    return mapping
 
 
 def run(filepath, method="bu", dump=False):
@@ -240,9 +177,7 @@ def run(filepath, method="bu", dump=False):
     bdd.declare(*(defenses + attacks))
     expr = T.get_boolean_expression()
     TREE = bdd.add_expr(expr)
-    # custom_order = create_mapping(expr, defenses, attacks)
     custom_order = {d: i for i, d in enumerate(defenses + attacks)}
-    print(custom_order)
 
     if PRINT_PROGRESS:
         print(f"Initial size: {len(bdd)}")
@@ -256,19 +191,19 @@ def run(filepath, method="bu", dump=False):
         print(f"Size after custom-order: {len(bdd)}")
 
     if method == "bu":
-        pf = find_pareto_bu(bdd, TREE, defenses, ba)
+        pf = compute_pf_bu(bdd, TREE, defenses, ba)
     elif method == "all_paths":
         pf = compute_pf_all_paths(bdd, TREE, ba, defenses, attacks)
 
-    time = timer() - start
+    elapsed_time = timer() - start
 
-    return time, pf
+    return elapsed_time, pf
 
 
 PRINT_PROGRESS = False
 
 
-def run_average(filepath, NO_RUNS=100, method="bu"):
+def run_average(filepath: str, NO_RUNS: int = 100, method: str = "bu") -> float:
     return sum(run(filepath, method)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
 
@@ -286,7 +221,7 @@ if __name__ == "__main__":
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
     time, pf = run(
-        "./data/trees_w_assignments/tree_54.xml",
+        "./data/trees_w_assignments/tree_72.xml",
         method="all_paths",
         dump=False,
     )

@@ -253,11 +253,7 @@ def run(filepath):
     results_pf = remove_low_att_pts(results)
     results_pf = remove_high_def_pts(results_pf)
 
-    # print(f"ini: {results_pf}")
-    # print(f"def: {remove_dominated_pts("d", results_pf)}")
-    # print(f"att: {remove_dominated_pts("a", results_pf)}")
-
-    results_pf = remove_dominated_pts("d", results_pf)
+    results_pf = remove_dominated_pts(results_pf)
 
     if PRINT_PROGRESS:
         print(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")

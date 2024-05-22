@@ -61,6 +61,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("bu", "./data/trees_w_assignments/defensive_pareto_att.xml")
+    time, pf = run("bu", "./data/trees_w_assignments/tree_24.xml")
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))

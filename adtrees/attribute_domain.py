@@ -92,7 +92,7 @@ class AttrDomain:
             reduced_candidates = (
                 [(def_cost, float("inf"))]
                 if len(pts_candidates) == 0
-                else remove_dominated_pts("a", pts_candidates)
+                else remove_dominated_pts(pts_candidates)
             )
 
             if print_progress:
@@ -102,7 +102,7 @@ class AttrDomain:
 
         pts = remove_low_att_pts(pts)
         pts = remove_high_def_pts(pts)
-        pts = remove_dominated_pts("d", pts)
+        pts = remove_dominated_pts(pts)
 
         return pts
 
@@ -127,7 +127,7 @@ class AttrDomain:
                 print(f"Added for defense {active_defs} : {bu_result}")
             pts.extend(bu_result)
 
-        pf = remove_dominated_pts(T.root.type, pts)
+        pf = remove_dominated_pts(pts)
 
         if not T.is_proper_tree():
             print(
@@ -193,7 +193,7 @@ class AttrDomain:
         else:  # AND / OR nodes
             pts = self._process_children(T, node, ba)
 
-        pf = remove_dominated_pts("d", pts)
+        pf = remove_dominated_pts(pts)
 
         if PRINT_INTERMEDIATE:
             color = Fore.RED if node.type == "a" else Fore.GREEN
@@ -226,7 +226,7 @@ class AttrDomain:
                 (def_op([p[0] for p in cart_prod]), att_op([p[1] for p in cart_prod]))
             )
 
-        return remove_dominated_pts("d", strategies)
+        return remove_dominated_pts(strategies)
 
     def _bottom_up_inh(
         self, T: ADTree, action: ADNode, counter: ADNode, ba: BasicAssignment
@@ -242,7 +242,7 @@ class AttrDomain:
             for cnt_def, cnt_att in counter_pf
         ]
 
-        return remove_dominated_pts("d", strategies)
+        return remove_dominated_pts(strategies)
 
     def get_activation_map(self, T: ADTree, ba: BasicAssignment):
         activations = {}
