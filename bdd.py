@@ -1,6 +1,4 @@
 import itertools
-import os
-import re
 from timeit import default_timer as timer
 from typing import Dict, List, Tuple
 
