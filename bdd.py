@@ -200,12 +200,11 @@ def run(filepath, method="bu", dump=False):
     return elapsed_time, pf
 
 
-PRINT_PROGRESS = False
-
-
 def run_average(filepath: str, NO_RUNS: int = 100, method: str = "bu") -> float:
     return sum(run(filepath, method)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
+
+PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")

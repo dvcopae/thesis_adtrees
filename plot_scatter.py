@@ -1,9 +1,7 @@
 from pathlib import Path
 from matplotlib import patches
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from utils.util import read_results_from_csv
 

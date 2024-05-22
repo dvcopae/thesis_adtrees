@@ -4,7 +4,6 @@ from os import listdir
 from os.path import isfile, join
 
 from adtrees.adtree import ADTree
-from adtrees.basic_assignment import BasicAssignment
 from bdd import run_average as run_bdd
 from bilp import run_average as run_bilp
 from bu import run_average as run_bu

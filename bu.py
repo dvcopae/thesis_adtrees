@@ -13,7 +13,7 @@ def measure_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_bu(_T, _ba, False)
+    pf = min_cost_attr.evaluate_bu(_T, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
@@ -21,7 +21,7 @@ def measure_dummy_bu(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_dummy_bu(_T, _ba, False)
+    pf = min_cost_attr.evaluate_dummy_bu(_T, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
@@ -29,7 +29,7 @@ def measure_dummiest(T: ADTree, ba: BasicAssignment) -> float:
     _T = deepcopy(T)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_dummiest(_T, _ba, False)
+    pf = min_cost_attr.evaluate_dummiest(_T, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
@@ -48,6 +48,8 @@ def run(method, filepath):
 def run_average(method, filepath, NO_RUNS=100):
     return sum(run(method, filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
+
+PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 66, 72]:

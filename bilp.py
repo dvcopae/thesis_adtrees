@@ -2,6 +2,7 @@ import itertools
 import os
 import sys
 from timeit import default_timer as timer
+from typing import Dict, List, Tuple
 
 from colorama import Fore, init
 from gurobipy import GRB, LinExpr, Model
@@ -14,34 +15,50 @@ from utils.util import remove_dominated_pts, remove_high_def_pts, remove_low_att
 init(autoreset=True)
 
 
-def warmup_bilp():
+def warmup_bilp() -> None:
+    """Gurobi takes a bit more time on its first run, so account for this when doing benchmarks."""
     m = Model("warmup")
     x = m.addVar(vtype=GRB.BINARY)
     y = m.addVar(vtype=GRB.BINARY)
-    obj = 2 * x + 3 * y
-    m.setObjective(-obj)  # maximize
+    m.setObjective(-2 * x - 3 * y)
     m.addConstr(x >= y)
     m.setParam(GRB.Param.OutputFlag, 0)
     m.optimize()
 
 
-def get_model(T: ADTree, ba: BasicAssignment):
+def get_model(
+    T: ADTree, ba: BasicAssignment, dump: bool = False
+) -> Tuple[Model, LinExpr, LinExpr]:
+    """
+    Create the BILP model.
+
+    Parameters:
+        T (ADTree): The attack-defense tree.
+        ba (BasicAssignment): The basic assignment.
+        dump (bool): Write the model to a file.
+
+    Returns:
+        Tuple[Model, LinExpr, LinExpr]: The BILP model, defense cost, and attack cost linear expressions.
+    """
     m = Model("bilp")
 
     x_attacks = []
     x_deffs = []
     x_refinements = []
 
-    # Maps the ADTree nodes labels to model variables
-    model_vars = {}
+    attack_cost = LinExpr()
+    defense_cost = LinExpr()
+    # Maps the ADTree nodes labels to Gurobi model variables
+    model_vars: Dict[str, LinExpr] = {}
 
-    def get_inh_label(action: ADNode, counter: ADNode):
+    def get_inh_label(action: ADNode, counter: ADNode) -> str:
         return f"INH_{action.label}_{counter.label}"
 
-    def check_unique_label(label, list):
+    def check_unique_label(label: ADNode, list) -> bool:
+        """Check if label is unique in the list."""
         return len(list) == 0 or not any(l.label == label for l in list)
 
-    def get_model_node(node: ADNode, check_inh=True):
+    def get_model_node(node: ADNode, check_inh: bool = True) -> LinExpr:
         """
         This method should be used instead of `model_vars[node]` when
         using nodes which may have multiple labels
@@ -52,9 +69,6 @@ def get_model(T: ADTree, ba: BasicAssignment):
         )
 
         return model_vars[label]
-
-    attack_cost = LinExpr()
-    defense_cost = LinExpr()
 
     # Add all nodes of the tree to BILP variables
     for ad_node in T.dict.keys():
@@ -97,7 +111,7 @@ def get_model(T: ADTree, ba: BasicAssignment):
 
         countered = T.get_counter(ad_node)
         if countered:  # INH gate
-            x_inh_node = get_model_node(ad_node)
+            x_inh_node = get_model_node(ad_node, True)
             inh_label = get_inh_label(ad_node, countered)
             # x_INH is attack * (1-counterattack)
             m.addConstr(
@@ -142,12 +156,13 @@ def get_model(T: ADTree, ba: BasicAssignment):
 
     m.update()
 
-    # m.write("model.lp")
+    if dump:
+        m.write("model.lp")
 
     return m, defense_cost, attack_cost
 
 
-def _add_exclusion_constraint(m, x_d, solution):
+def _add_exclusion_constraint(m: Model, x_d: List[LinExpr], solution) -> None:
     """Add auxiliary constraints to ensure the defense is `solutions`"""
 
     for i, var in enumerate(x_d):
@@ -161,7 +176,7 @@ def _add_exclusion_constraint(m, x_d, solution):
             m.addConstr(var == solution[i], name=constr_name)
 
 
-def no_good_cut_method(m, defense_cost, attack_cost):
+def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
     results = []
 
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
@@ -174,17 +189,13 @@ def no_good_cut_method(m, defense_cost, attack_cost):
 
     for def_vector in itertools.product([0, 1], repeat=defense_cost.size()):
         # def_vector must not `extend` any of the defense vectors which result in an infinity cost
-        skip = False
-        for iv in infty_vectors:
-            if all(iv[i] == 0 or iv[i] == def_vector[i] for i in range(len(iv))):
-                skip = True
-                continue
-
-        if skip:
+        if any(
+            all(iv[i] == 0 or iv[i] == def_vector[i] for i in range(len(iv)))
+            for iv in infty_vectors
+        ):
             continue
 
         _add_exclusion_constraint(m, x_d, def_vector)
-
         m.optimize()
 
         if m.status != GRB.OPTIMAL:
@@ -237,38 +248,33 @@ def no_good_cut_method(m, defense_cost, attack_cost):
     return results
 
 
-def run(filepath):
+def run(filepath: str) -> Tuple[float, List[Tuple[float, float]], int, int]:
     T = ADTree(filepath)
-    tree_size = T.subtree_size()
-    defense_count = len(T.get_basic_actions("d"))
-
     ba = BasicAssignment(filepath)
 
     start = timer()
 
-    m, defense_cost, attack_cost = get_model(T, ba)
+    m, defense_cost, _ = get_model(T, ba)
 
-    results = no_good_cut_method(m, defense_cost, attack_cost)
+    results = compute_pf(m, defense_cost)
 
-    results_pf = remove_low_att_pts(results)
-    results_pf = remove_high_def_pts(results_pf)
-
-    results_pf = remove_dominated_pts(results_pf)
+    results = remove_low_att_pts(results)
+    results = remove_high_def_pts(results)
+    results = remove_dominated_pts(results)
 
     if PRINT_PROGRESS:
-        print(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
+        print(Fore.RED + f"Removed {list(set(results) - set(results))}")
 
-    time = timer() - start
-    return time, results_pf, tree_size, defense_count
-
-
-PRINT_PROGRESS = False
+    time_elapsed = timer() - start
+    return time_elapsed, results, T.subtree_size(), len(T.get_basic_actions("d"))
 
 
 def run_average(filepath, NO_RUNS=10):
     warmup_bilp()
     return sum(run(filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
 
+
+PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BILP =====\n")

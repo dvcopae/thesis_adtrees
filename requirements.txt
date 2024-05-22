@@ -4,3 +4,4 @@ colorama==0.4.6
 dd==0.6.0
 gurobipy==11.0.2
 matplotlib==3.9.0
+numpy==1.26.4
