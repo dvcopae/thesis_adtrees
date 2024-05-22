@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import os.path
 import random
 import shutil
 import xml.etree.ElementTree as ET
 
-from util import generate_random_string
 from add_random_parameters import add_values_to_basic_events
+from util import generate_random_string
 
 
 def modify_labels(xml_path, output_path):
@@ -48,7 +50,8 @@ def merge_trees(tree_path, tree_path_format):
             raise ValueError("No valid node found to replace")
         random_node_to_replace = random.choice(candidate_nodes)
 
-        # Replace the randomly chosen node in thesis_tree_large.xml with the root node from thesis_tree_6_i.xml
+        # Replace the randomly chosen node in thesis_tree_large.xml
+        # with the root node from thesis_tree_6_i.xml
         random_node_to_replace.clear()
         random_node_to_replace.tag = root_node_i.tag
         random_node_to_replace.attrib = root_node_i.attrib
@@ -61,19 +64,19 @@ def merge_trees(tree_path, tree_path_format):
 
 
 if __name__ == "__main__":
-    inFilePath = "./data/trees/thesis_tree.xml"
-    outFilePath = "./utils/thesis_tree.xml"
-    formatFile = outFilePath[:-4] + "_{i}" + ".xml"
+    IN_FILE_PATH = "./data/trees/thesis_tree.xml"
+    OUT_FILE_PATH = "./utils/thesis_tree.xml"
+    FORMAT_FILE = OUT_FILE_PATH[:-4] + "_{i}" + ".xml"
 
-    shutil.copyfile(inFilePath, outFilePath)
+    shutil.copyfile(IN_FILE_PATH, OUT_FILE_PATH)
 
     N = 17
 
     for i in range(N):
-        modify_labels(inFilePath, formatFile.format(i=i))
+        modify_labels(IN_FILE_PATH, FORMAT_FILE.format(i=i))
 
-    merge_trees(outFilePath, formatFile)
+    merge_trees(OUT_FILE_PATH, FORMAT_FILE)
 
-    add_values_to_basic_events(outFilePath)
+    add_values_to_basic_events(OUT_FILE_PATH)
 
-    os.remove(outFilePath)
+    os.remove(OUT_FILE_PATH)

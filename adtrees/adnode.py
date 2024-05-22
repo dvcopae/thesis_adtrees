@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class ADNode:
     """
     Representation of a node of an attack-defense tree. Building block for
@@ -31,11 +34,11 @@ class ADNode:
         type, label, ref
 
         """
-        super(ADNode, self).__init__()
+        super().__init__()
         # check whether the parameters provided are OK.
         # actor
         if actor not in ["a", "d"]:
-            print("Invalid actor: {}".format(actor))
+            print(f"Invalid actor: {actor}")
             help(ADNode)
             return
         self.type = actor
@@ -53,7 +56,7 @@ class ADNode:
         elif refinement is None:
             self.ref = ""
         else:
-            print("Invalid refinement: {}".format(refinement))
+            print(f"Invalid refinement: {refinement}")
             help(ADNode)
             return
 
@@ -72,5 +75,5 @@ class ADNode:
 
     def __repr__(self):
         if self.is_basic():
-            return "({}, {}, {})".format(self.type, self.label, "BS")
-        return "({}, {}, {})".format(self.type, self.label, self.ref)
+            return f"({self.type}, {self.label}, {'BS'})"
+        return f"({self.type}, {self.label}, {self.ref})"

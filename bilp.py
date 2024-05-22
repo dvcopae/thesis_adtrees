@@ -1,16 +1,21 @@
+from __future__ import annotations
+
 import itertools
-import os
 import sys
 from timeit import default_timer as timer
-from typing import Dict, List, Tuple
 
-from colorama import Fore, init
-from gurobipy import GRB, LinExpr, Model
+from colorama import Fore
+from colorama import init
+from gurobipy import GRB
+from gurobipy import LinExpr
+from gurobipy import Model
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from utils.util import remove_dominated_pts, remove_high_def_pts, remove_low_att_pts
+from utils.util import remove_dominated_pts
+from utils.util import remove_high_def_pts
+from utils.util import remove_low_att_pts
 
 init(autoreset=True)
 
@@ -27,8 +32,10 @@ def warmup_bilp() -> None:
 
 
 def get_model(
-    T: ADTree, ba: BasicAssignment, dump: bool = False
-) -> Tuple[Model, LinExpr, LinExpr]:
+    T: ADTree,
+    ba: BasicAssignment,
+    dump: bool = False,
+) -> tuple[Model, LinExpr, LinExpr]:
     """
     Create the BILP model.
 
@@ -38,7 +45,8 @@ def get_model(
         dump (bool): Write the model to a file.
 
     Returns:
-        Tuple[Model, LinExpr, LinExpr]: The BILP model, defense cost, and attack cost linear expressions.
+        Tuple[Model, LinExpr, LinExpr]: The BILP model,
+        defense cost, and attack cost linear expressions.
     """
     m = Model("bilp")
 
@@ -49,14 +57,14 @@ def get_model(
     attack_cost = LinExpr()
     defense_cost = LinExpr()
     # Maps the ADTree nodes labels to Gurobi model variables
-    model_vars: Dict[str, LinExpr] = {}
+    model_vars: dict[str, LinExpr] = {}
 
     def get_inh_label(action: ADNode, counter: ADNode) -> str:
         return f"INH_{action.label}_{counter.label}"
 
-    def check_unique_label(label: ADNode, list) -> bool:
+    def check_unique_label(label: ADNode, elements: list) -> bool:
         """Check if label is unique in the list."""
-        return len(list) == 0 or not any(l.label == label for l in list)
+        return len(elements) == 0 or not any(l.label == label for l in elements)
 
     def get_model_node(node: ADNode, check_inh: bool = True) -> LinExpr:
         """
@@ -131,7 +139,8 @@ def get_model(
         ]
         children_sum_expr = LinExpr()
         children_sum_expr.addTerms(
-            [1] * len(label_children), [c[1] for c in label_children]
+            [1] * len(label_children),
+            [c[1] for c in label_children],
         )
 
         if ad_node.ref == "AND":
@@ -162,7 +171,7 @@ def get_model(
     return m, defense_cost, attack_cost
 
 
-def _add_exclusion_constraint(m: Model, x_d: List[LinExpr], solution) -> None:
+def _add_exclusion_constraint(m: Model, x_d: list[LinExpr], solution) -> None:
     """Add auxiliary constraints to ensure the defense is `solutions`"""
 
     for i, var in enumerate(x_d):
@@ -176,7 +185,7 @@ def _add_exclusion_constraint(m: Model, x_d: List[LinExpr], solution) -> None:
             m.addConstr(var == solution[i], name=constr_name)
 
 
-def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
+def compute_pf(m: Model, defense_cost: LinExpr) -> list[tuple[float, float]]:
     results = []
 
     x_d = [defense_cost.getVar(i) for i in range(defense_cost.size())]
@@ -202,7 +211,8 @@ def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
             if 0 in def_vector:
                 infty_vectors.append(def_vector)
 
-            # Since we are adding the previous solutions instead of the current ones, the last one won't be added. Add it now.
+            # Since we are adding the previous solutions instead of the
+            # current ones, the last one won't be added. Add it now.
             sol = (last_def_cost, last_att_cost)
             if sol not in results:
                 if PRINT_PROGRESS:
@@ -228,7 +238,7 @@ def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
         if PRINT_PROGRESS:
             print(
                 Fore.GREEN
-                + f"Found solution {current_defense_cost, current_attack_cost}"
+                + f"Found solution {current_defense_cost, current_attack_cost}",
             )
             print(
                 ", ".join(
@@ -236,8 +246,8 @@ def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
                         f"{v.varName}: {int(abs(v.x))}"
                         for v in m.getVars()
                         if not v.varName.startswith("aux_")
-                    ]
-                )
+                    ],
+                ),
             )
 
         results.append((current_defense_cost, current_attack_cost))  # Record solution
@@ -248,7 +258,7 @@ def compute_pf(m: Model, defense_cost: LinExpr) -> List[Tuple[float, float]]:
     return results
 
 
-def run(filepath: str) -> Tuple[float, List[Tuple[float, float]], int, int]:
+def run(filepath: str) -> tuple[float, list[tuple[float, float]], int, int]:
     T = ADTree(filepath)
     ba = BasicAssignment(filepath)
 
@@ -269,9 +279,9 @@ def run(filepath: str) -> Tuple[float, List[Tuple[float, float]], int, int]:
     return time_elapsed, results, T.subtree_size(), len(T.get_basic_actions("d"))
 
 
-def run_average(filepath, NO_RUNS=10):
+def run_average(filepath, no_runs=10):
     warmup_bilp()
-    return sum(run(filepath)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
+    return sum(run(filepath)[0] for _ in range(0, no_runs)) / no_runs
 
 
 PRINT_PROGRESS = False
@@ -292,4 +302,4 @@ if __name__ == "__main__":
 
     time, pf, _, _ = run("./data/trees_w_assignments/defensive_pareto_att.xml")
     print(pf)
-    print("Time: {:.2f} ms.\n".format(time * 1000))
+    print(f"Time: {time * 1000:.2f} ms.\n")

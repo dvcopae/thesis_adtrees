@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import matplotlib.pyplot as plt
 
 from utils.util import read_results_from_csv
@@ -33,7 +35,9 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
     plot(range(min(len(x_labels), len(bilp_values))), bilp_values, "bilp")
     plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd_bu")
     plot(
-        range(min(len(x_labels), len(bdd_all_values))), bdd_all_values, "bdd_all_paths"
+        range(min(len(x_labels), len(bdd_all_values))),
+        bdd_all_values,
+        "bdd_all_paths",
     )
 
     plt.legend(loc="lower right")
@@ -42,7 +46,7 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
 
 
 if __name__ == "__main__":
-    x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values = (
-        read_results_from_csv("./benchmarking/algorithm_linear.csv")
+    labels, dummy, bilp, bdd_bu, bdd_all = read_results_from_csv(
+        "./benchmarking/algorithm_linear.csv",
     )
-    plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values)
+    plot_results(labels, dummy, bilp, bdd_bu, bdd_all)

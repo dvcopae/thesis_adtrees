@@ -1,23 +1,29 @@
-import itertools
+from __future__ import annotations
+
 from timeit import default_timer as timer
-from typing import Dict, List, Tuple
 
 import dd.bdd as _bdd
-from colorama import Fore, init
+from colorama import Fore
+from colorama import init
 
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from utils.util import remove_dominated_pts, remove_high_def_pts, remove_low_att_pts
+from utils.util import remove_dominated_pts
+from utils.util import remove_high_def_pts
+from utils.util import remove_low_att_pts
 
 init(autoreset=True)
 
 
 def _eval_path_cost(
-    path: Dict[str, bool], ba: BasicAssignment, defenses: List[str], attacks: List[str]
-) -> Tuple[float, float]:
-    def_cost = sum([ba[d] for d in defenses if d in path and path[d]])
-    att_cost = sum([ba[a] for a in attacks if a in path and path[a]])
+    path: dict[str, bool],
+    ba: BasicAssignment,
+    defenses: list[str],
+    attacks: list[str],
+) -> tuple[float, float]:
+    def_cost = sum(ba[d] for d in defenses if d in path and path[d])
+    att_cost = sum(ba[a] for a in attacks if a in path and path[a])
     return def_cost, att_cost
 
 
@@ -27,10 +33,10 @@ pf_storage = {}
 def compute_pf_bu(
     bdd: _bdd.BDD,
     u: int,
-    defenses: List[str],
+    defenses: list[str],
     ba: BasicAssignment,
     goal: bool = True,
-) -> List[Tuple[float, float]]:
+) -> list[tuple[float, float]]:
     # Avoid revisiting nodes
     if u in pf_storage:
         return pf_storage[u]
@@ -75,9 +81,11 @@ def compute_pf_bu(
 failed_paths = []
 
 
-def find_all_paths_bdd(bdd: _bdd.BDD, u, path={}, goal=True):
+def find_all_paths_bdd(bdd: _bdd.BDD, u, path=None, goal=True):
     """Recurse to enumerate models."""
-    global failed_paths
+
+    if not path:
+        path = {}
 
     p = abs(u)
 
@@ -112,9 +120,9 @@ def compute_pf_all_paths(
     bdd: _bdd.BDD,
     root: ADNode,
     ba: BasicAssignment,
-    defenses: List[str],
-    attacks: List[str],
-) -> List[Tuple[float, float]]:
+    defenses: list[str],
+    attacks: list[str],
+) -> list[tuple[float, float]]:
     global failed_paths
     pf_dict = {}
     failed_paths = []
@@ -122,7 +130,8 @@ def compute_pf_all_paths(
     for c in find_all_paths_bdd(bdd, root):
         def_cost, att_cost = _eval_path_cost(c, ba, defenses, attacks)
 
-        # Fill path with missing defenses, and keep track of which defense configurations we encountered
+        # Fill path with missing defenses, and keep track of
+        # which defense configurations we encountered
         for s in defenses + attacks:
             c.setdefault(s, False)
 
@@ -164,17 +173,17 @@ def run(filepath, method="bu", dump=False):
     pf_storage = {}
 
     ba = BasicAssignment(filepath)
-    T = ADTree(filepath)
-    defenses = T.get_basic_actions("d")
-    attacks = T.get_basic_actions("a")
+    tree = ADTree(filepath)
+    defenses = tree.get_basic_actions("d")
+    attacks = tree.get_basic_actions("a")
 
     start = timer()
 
     bdd = _bdd.BDD()
     bdd.configure(reordering=False)
     bdd.declare(*(defenses + attacks))
-    expr = T.get_boolean_expression()
-    TREE = bdd.add_expr(expr)
+    expr = tree.get_boolean_expression()
+    root = bdd.add_expr(expr)
     custom_order = {d: i for i, d in enumerate(defenses + attacks)}
 
     if PRINT_PROGRESS:
@@ -183,23 +192,24 @@ def run(filepath, method="bu", dump=False):
     _bdd.reorder(bdd, custom_order)
 
     if dump:
-        bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[TREE])
+        bdd.dump("./bdds/bdd_graph_custom_reorder.png", roots=[root])
 
     if PRINT_PROGRESS:
         print(f"Size after custom-order: {len(bdd)}")
 
+    pf = []
     if method == "bu":
-        pf = compute_pf_bu(bdd, TREE, defenses, ba)
+        pf = compute_pf_bu(bdd, root, defenses, ba)
     elif method == "all_paths":
-        pf = compute_pf_all_paths(bdd, TREE, ba, defenses, attacks)
+        pf = compute_pf_all_paths(bdd, root, ba, defenses, attacks)
 
     elapsed_time = timer() - start
 
     return elapsed_time, pf
 
 
-def run_average(filepath: str, NO_RUNS: int = 100, method: str = "bu") -> float:
-    return sum(run(filepath, method)[0] for _ in range(0, NO_RUNS)) / NO_RUNS
+def run_average(filepath: str, no_runs: int = 100, method: str = "bu") -> float:
+    return sum(run(filepath, method)[0] for _ in range(0, no_runs)) / no_runs
 
 
 PRINT_PROGRESS = False
@@ -217,10 +227,10 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run(
-        "./data/trees_w_assignments/tree_72.xml",
+    time, output = run(
+        "./data/trees_w_assignments/defensive_pareto_att.xml",
         method="all_paths",
         dump=False,
     )
-    print(pf)
-    print("Time: {:.2f} ms.\n".format(time * 1000))
+    print(output)
+    print(f"Time: {time * 1000:.2f} ms.\n")

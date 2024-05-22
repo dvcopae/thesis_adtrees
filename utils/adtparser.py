@@ -1,4 +1,6 @@
-from xml.etree.cElementTree import parse
+from __future__ import annotations
+
+from xml.etree.ElementTree import parse
 
 from adtrees.adnode import ADNode
 from utils.util import clean_tla_identifier
@@ -9,14 +11,10 @@ def file_to_dict(path):
     Path to an ADTool .xml output file --> dictionary for the ADTree creation.
     """
     try:
-        with open(path, "rt") as f:
+        with open(path, encoding="utf-8") as f:
             tree = parse(f)
-    except FileNotFoundError:
-        raise (
-            "Couldn't load ADTree from {}\nThere is no such file or directory.".format(
-                path
-            )
-        )
+    except FileNotFoundError as exc:
+        raise f"Couldn't load ADTree from {path}\nThere is no such file or directory." from exc
 
     tree_root = tree.getroot()[0]
     pt = "a"  # the root is assumed to be of the attacker's type
@@ -91,15 +89,13 @@ def get_basic_assignment_xml(path):
     Path to an ADTool .xml output file --> dictionary containing the basic assignment.
     """
     try:
-        with open(path, "rt") as f:
+        with open(path, encoding="utf-8") as f:
             tree = parse(f)
     except FileNotFoundError:
         print(
-            "Couldn't load the basic assignment from {}\nThere is no such file or directory.".format(
-                path
-            )
+            f"Couldn't load the basic assignment from {path}\n\
+            There is no such file or directory.",
         )
-        return
 
     real_root = tree.getroot()[0]
     result = {}

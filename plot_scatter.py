@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from pathlib import Path
-from matplotlib import patches
+
 import matplotlib.pyplot as plt
 import numpy
+from matplotlib import patches
 
 from utils.util import read_results_from_csv
 
@@ -10,7 +13,7 @@ def size_to_color(n):
     return n // 20
 
 
-def plot_results(x_labels, x, y, output):
+def plot_results(labels, x, y, output):
     plt.yscale("log")
     plt.xscale("log")
 
@@ -25,7 +28,7 @@ def plot_results(x_labels, x, y, output):
     }
 
     # Apply colors based on size categories
-    colors = [color_mapping[size_to_color(int(l.partition("(")[0]))] for l in x_labels]
+    colors = [color_mapping[size_to_color(int(l.partition("(")[0]))] for l in labels]
 
     lower_limit = 10**-2.5
     upper_limit = 10**6.5
@@ -75,16 +78,16 @@ if __name__ == "__main__":
         return output
 
     # BDD <-> BILP
-    filename = "./benchmarking/algorithm_bdd_bilp.csv"
-    x_labels, _, bilp_values, bdd_bu_values, _ = read_results_from_csv(filename)
-    plot_results(x_labels, bdd_bu_values, bilp_values, get_plot_filename(filename))
+    FILENAME = "./benchmarking/algorithm_bdd_bilp.csv"
+    x_labels, _, bilp_values, bdd_bu_values, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bdd_bu_values, bilp_values, get_plot_filename(FILENAME))
 
     # BDD <-> BU
-    filename = "./benchmarking/algorithm_bdd_bu.csv"
-    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(filename)
-    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(filename))
+    FILENAME = "./benchmarking/algorithm_bdd_bu.csv"
+    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(FILENAME))
 
     # BDD <-> dummiest
-    filename = "./benchmarking/algorithm_bdd_dummy.csv"
-    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(filename)
-    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(filename))
+    FILENAME = "./benchmarking/algorithm_bdd_dummy.csv"
+    x_labels, dummiest_values, _, bdd_bu_values, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bdd_bu_values, dummiest_values, get_plot_filename(FILENAME))

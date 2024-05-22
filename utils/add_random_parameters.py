@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import random
 import xml.etree.ElementTree as ET
@@ -43,8 +45,9 @@ def add_values_to_basic_events(file_path):
     ET.indent(tree, space="  ", level=0)
     tree.write(
         os.path.join(
-            "./data/trees_w_assignments", Path(file_path).stem + "_modified.xml"
-        )
+            "./data/trees_w_assignments",
+            Path(file_path).stem + "_modified.xml",
+        ),
     )
 
 

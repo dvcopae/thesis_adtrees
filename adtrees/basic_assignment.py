@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import deepcopy
 
 from utils.adtparser import get_basic_assignment_xml
@@ -25,7 +27,7 @@ def _from_txt(path):
     """
     result = {}
     try:
-        with open(path, "rt") as f:
+        with open(path, encoding="utf-8") as f:
             line = f.readline()  # = 'label\tvalue\n'
             while line != "" and line[0] == "#":
                 line = f.readline()
@@ -56,9 +58,7 @@ def _from_txt(path):
                         line = f.readline()
     except FileNotFoundError:
         print(
-            "Couldn't load basic assignment from {}\n There is no such file or directory.".format(
-                path
-            )
+            f"Couldn't load basic assignment from {path}\n There is no such file or directory.",
         )
     return result
 
@@ -81,7 +81,7 @@ class BasicAssignment:
     """
 
     def __init__(self, path=None):
-        super(BasicAssignment, self).__init__()
+        super().__init__()
 
         if isinstance(path, str):
             if path[-4:] == ".xml":
@@ -106,8 +106,7 @@ class BasicAssignment:
         return label in self.map
 
     def __iter__(self):
-        for item in self.map:
-            yield item
+        yield from self.map
 
     def __setitem__(self, label, value):
         """
@@ -118,10 +117,10 @@ class BasicAssignment:
     def __getitem__(self, label):
         if str(label) in self:
             return self.map[str(label)]
-        else:
-            raise ValueError(
-                "The action '" + str(label) + "' is not assigned any value."
-            )
+
+        raise ValueError(
+            "The action '" + str(label) + "' is not assigned any value.",
+        )
 
     def output(self, name):
         """

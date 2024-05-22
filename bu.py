@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from copy import deepcopy
-import os
 from timeit import default_timer as timer
 
 from adtrees.adtree import ADTree
@@ -9,40 +10,42 @@ from adtrees.basic_assignment import BasicAssignment
 min_cost_attr = AttrDomain(min, sum, min, sum, 0, float("inf"))
 
 
-def measure_bu(T: ADTree, ba: BasicAssignment) -> float:
-    _T = deepcopy(T)
+def measure_bu(tree: ADTree, ba: BasicAssignment) -> float:
+    _tree = deepcopy(tree)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_bu(_T, _ba, PRINT_PROGRESS)
+    pf = min_cost_attr.evaluate_bu(_tree, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
-def measure_dummy_bu(T: ADTree, ba: BasicAssignment) -> float:
-    _T = deepcopy(T)
+def measure_dummy_bu(tree: ADTree, ba: BasicAssignment) -> float:
+    _tree = deepcopy(tree)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_dummy_bu(_T, _ba, PRINT_PROGRESS)
+    pf = min_cost_attr.evaluate_dummy_bu(_tree, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
-def measure_dummiest(T: ADTree, ba: BasicAssignment) -> float:
-    _T = deepcopy(T)
+def measure_dummiest(tree: ADTree, ba: BasicAssignment) -> float:
+    _tree = deepcopy(tree)
     _ba = deepcopy(ba)
     start = timer()
-    pf = min_cost_attr.evaluate_dummiest(_T, _ba, PRINT_PROGRESS)
+    pf = min_cost_attr.evaluate_dummiest(_tree, _ba, PRINT_PROGRESS)
     return timer() - start, pf
 
 
 def run(method, filepath):
-    T = ADTree(filepath)
+    tree = ADTree(filepath)
 
     ba = BasicAssignment(filepath)
     if method == "dummiest":
-        return measure_dummiest(T, ba)
-    elif method == "dummy-bu":
-        return measure_dummy_bu(T, ba)
-    elif method == "bu":
-        return measure_bu(T, ba)
+        return measure_dummiest(tree, ba)
+
+    if method == "dummy-bu":
+        return measure_dummy_bu(tree, ba)
+
+    if method == "bu":
+        return measure_bu(tree, ba)
 
 
 def run_average(method, filepath, NO_RUNS=100):
@@ -63,6 +66,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("bu", "./data/trees_w_assignments/tree_24.xml")
-    print(pf)
-    print("Time: {:.2f} ms.\n".format(time * 1000))
+    time, output = run("bu", "./data/trees_w_assignments/defensive_pareto_att.xml")
+    print(output)
+    print(f"Time: {time * 1000:.2f} ms.\n")

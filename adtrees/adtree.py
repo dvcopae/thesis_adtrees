@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import deepcopy
 
 from adtrees.adnode import ADNode
@@ -38,7 +40,7 @@ class ADTree:
         self.dict
         self.root
         """
-        super(ADTree, self).__init__()
+        super().__init__()
 
         if dictionary is None:
             dictionary = {}
@@ -63,13 +65,13 @@ class ADTree:
         elif isinstance(dictionary, dict) and len(dictionary) > 0:
             # tree is created from a dictionary.
             # check if the dictionary actually describes a tree
-            keys = [i for i in dictionary.keys()]
+            keys = list(dictionary.keys())
             in_lists = [node for item in dictionary.values() for node in item]
             # 1. every element that is in one of the lists is also a key of the dictionary; and it is an ADNode
             for item in in_lists:
                 if not isinstance(item, ADNode) or item not in keys:
                     print(
-                        "Either dictionary does not describe a tree or else not all of the elements are ADNodes."
+                        "Either dictionary does not describe a tree or else not all of the elements are ADNodes.",
                     )
                     help(ADTree)
                     return
@@ -79,7 +81,8 @@ class ADTree:
                 print("Invalid number of roots.")
                 help(ADTree)
                 return
-            elif not isinstance(roots[0], ADNode):
+
+            if not isinstance(roots[0], ADNode):
                 print("At least one of the dictionary keys is not an ADNode.")
                 help(ADTree)
                 return
@@ -95,7 +98,7 @@ class ADTree:
         # set term
         self.ad_term = self.ad_term()
         # store the set of all nodes holding basic actions of the tree.
-        self.basics = set([node for node in self.dict.keys() if node.is_basic()])
+        self.basics = {node for node in self.dict if node.is_basic()}
 
     def ad_term(self, node=None):
         """
@@ -294,7 +297,10 @@ class ADTree:
         return self.__is_strategy_successful(self.root, activation_map)
 
     def __is_strategy_successful(
-        self, node: ADNode, activation_map: dict, check_countered=True
+        self,
+        node: ADNode,
+        activation_map: dict,
+        check_countered=True,
     ):
         is_inh_gate = check_countered and self.is_countered(node)
 
@@ -302,9 +308,12 @@ class ADTree:
             counter_node = self.get_counter(node)
             # we have an INH gate between `node` and `counter_node`
             return self.__is_strategy_successful(
-                node, activation_map, check_countered=False
+                node,
+                activation_map,
+                check_countered=False,
             ) and not self.__is_strategy_successful(counter_node, activation_map)
-        elif node.ref == "":  # Basic action
+
+        if node.ref == "":  # Basic action
             return activation_map[node.label]
         else:  # AND / OR nodes
             children_activations = [
@@ -390,7 +399,7 @@ class ADTree:
             f.write(self.__xml__(self.root))
             f.write("</adtree>")
         print(
-            'Tree structure written to "' + name + '", ready to be opened with ADTool!'
+            'Tree structure written to "' + name + '", ready to be opened with ADTool!',
         )
         return
 

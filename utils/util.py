@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 import re
 import secrets
@@ -18,11 +20,10 @@ def remove_dominated_pts(points):
     pareto_front = [sorted_points[0]]
 
     for point in sorted_points[1:]:
-        """
-        We have two conditions:
-        1) The defense cost of point > defense cost of the last element from pareto_front
-        2) The attack cost of point > attack cost of the last element from pareto_front
-        """
+        # We have two conditions:
+        # 1) The defense cost of point > defense cost of the last element from pareto_front
+        # 2) The attack cost of point > attack cost of the last element from pareto_front
+
         if point[0] > pareto_front[-1][0] and point[1] > pareto_front[-1][1]:
             pareto_front.append(point)
 
@@ -60,7 +61,7 @@ def remove_low_att_pts(points):
         if def_cost not in cost_dict or att_cost > cost_dict[def_cost]:
             cost_dict[def_cost] = att_cost
 
-    return [(k, v) for k, v in cost_dict.items()]
+    return list(cost_dict.items())
 
 
 def clean_tla_identifier(identifier):
@@ -89,7 +90,7 @@ def read_results_from_csv(file_path):
     bilp_values = []
     bdd_bu_values = []
     bdd_all_values = []
-    with open(file_path, "r") as file:
+    with open(file_path, encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
         for row in reader:
