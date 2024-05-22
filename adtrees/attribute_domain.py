@@ -5,7 +5,7 @@ from colorama import Fore, init
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from utils.util import remove_dominated_pts, remove_low_att_pts
+from utils.util import remove_dominated_pts, remove_high_def_pts, remove_low_att_pts
 
 init(autoreset=True)
 
@@ -92,7 +92,7 @@ class AttrDomain:
             reduced_candidates = (
                 [(def_cost, float("inf"))]
                 if len(pts_candidates) == 0
-                else remove_dominated_pts(T.root.type, pts_candidates)
+                else remove_dominated_pts("a", pts_candidates)
             )
 
             if print_progress:
@@ -100,8 +100,9 @@ class AttrDomain:
 
             pts.extend(reduced_candidates)
 
-        pts = remove_low_att_pts(T.root.type, pts)
-        pts = remove_dominated_pts(T.root.type, pts)
+        pts = remove_low_att_pts(pts)
+        pts = remove_high_def_pts(pts)
+        pts = remove_dominated_pts("d", pts)
 
         return pts
 
@@ -192,7 +193,7 @@ class AttrDomain:
         else:  # AND / OR nodes
             pts = self._process_children(T, node, ba)
 
-        pf = remove_dominated_pts(node.type, pts)
+        pf = remove_dominated_pts("d", pts)
 
         if PRINT_INTERMEDIATE:
             color = Fore.RED if node.type == "a" else Fore.GREEN
@@ -225,7 +226,7 @@ class AttrDomain:
                 (def_op([p[0] for p in cart_prod]), att_op([p[1] for p in cart_prod]))
             )
 
-        return remove_dominated_pts(node.type, strategies)
+        return remove_dominated_pts("d", strategies)
 
     def _bottom_up_inh(
         self, T: ADTree, action: ADNode, counter: ADNode, ba: BasicAssignment
@@ -241,7 +242,7 @@ class AttrDomain:
             for cnt_def, cnt_att in counter_pf
         ]
 
-        return remove_dominated_pts(action.type, strategies)
+        return remove_dominated_pts("d", strategies)
 
     def get_activation_map(self, T: ADTree, ba: BasicAssignment):
         activations = {}

@@ -21,7 +21,7 @@ def plot(_x, _y, label):
 
 
 def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values):
-    plt.figure(figsize=(14, 4.5))
+    plt.figure(figsize=(14, 6))
 
     plt.yscale("log")
     plt.xlabel("Tree size(defenses)")
@@ -31,9 +31,12 @@ def plot_results(x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_
 
     plot(range(min(len(x_labels), len(dummiest_values))), dummiest_values, "dummiest")
     plot(range(min(len(x_labels), len(bilp_values))), bilp_values, "bilp")
-    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd")
+    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd_bu")
+    plot(
+        range(min(len(x_labels), len(bdd_all_values))), bdd_all_values, "bdd_all_paths"
+    )
 
-    plt.legend(loc="best")
+    plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig("benchmark.png")
 

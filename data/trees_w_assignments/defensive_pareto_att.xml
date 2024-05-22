@@ -1,0 +1,73 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>AND1</label>
+    <node refinement="conjunctive">
+      <label>a2</label>
+      <parameter domainId="MinCost1" category="basic">8</parameter>
+      <node refinement="conjunctive" switchRole="yes">
+        <label>AND3</label>
+        <node refinement="conjunctive">
+          <label>AND4</label>
+          <node refinement="conjunctive">
+            <label>d6</label>
+            <parameter domainId="MinCost1" category="basic">8</parameter>
+            <node refinement="conjunctive" switchRole="yes">
+              <label>a4</label>
+              <parameter domainId="MinCost1" category="basic">2</parameter>
+              <node refinement="conjunctive" switchRole="yes">
+                <label>d7</label>
+                <parameter domainId="MinCost1" category="basic">4</parameter>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>d3</label>
+            <parameter domainId="MinCost1" category="basic">16</parameter>
+          </node>
+        </node>
+        <node refinement="conjunctive">
+          <label>d2</label>
+          <parameter domainId="MinCost1" category="basic">16</parameter>
+        </node>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>a1</label>
+          <parameter domainId="MinCost1" category="basic">64</parameter>
+        </node>
+      </node>
+    </node>
+    <node refinement="conjunctive">
+      <label>a3</label>
+      <parameter domainId="MinCost1" category="basic">32</parameter>
+    </node>
+    <node refinement="conjunctive">
+      <label>AND2</label>
+      <node refinement="conjunctive">
+        <label>a7</label>
+        <parameter domainId="MinCost1" category="basic">16</parameter>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>AND5</label>
+          <node refinement="conjunctive">
+            <label>d4</label>
+            <parameter domainId="MinCost1" category="basic">32</parameter>
+          </node>
+          <node refinement="conjunctive">
+            <label>d5</label>
+            <parameter domainId="MinCost1" category="basic">2</parameter>
+          </node>
+          <node refinement="conjunctive" switchRole="yes">
+            <label>a5</label>
+            <parameter domainId="MinCost1" category="basic">128</parameter>
+          </node>
+        </node>
+      </node>
+      <node refinement="conjunctive">
+        <label>a6</label>
+        <parameter domainId="MinCost1" category="basic">4</parameter>
+      </node>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>

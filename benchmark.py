@@ -58,7 +58,7 @@ def eval_bdd_all(file):
 if __name__ == "__main__":
     tree_linear_files = [
         f"./data/trees_w_assignments/tree_{i}.xml"
-        for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 86, 98, 110]
+        for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96]
     ]
     dummy_x = [
         f"./data/trees_w_assignments/tree_{i}.xml" for i in [6, 12, 18, 24, 30, 36]

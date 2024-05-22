@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 from timeit import default_timer as timer
 
 from adtrees.adtree import ADTree
@@ -49,7 +50,7 @@ def run_average(method, filepath, NO_RUNS=100):
 
 
 if __name__ == "__main__":
-    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 66, 72]:
     #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
@@ -60,6 +61,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf = run("dummiest", "./data/trees_w_assignments/tree_42.xml")
+    time, pf = run("bu", "./data/trees_w_assignments/defensive_pareto_att.xml")
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))

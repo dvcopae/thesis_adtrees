@@ -1,4 +1,5 @@
 import itertools
+import os
 import sys
 from timeit import default_timer as timer
 
@@ -8,7 +9,7 @@ from gurobipy import GRB, LinExpr, Model
 from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
-from utils.util import remove_dominated_pts, remove_low_att_pts
+from utils.util import remove_dominated_pts, remove_high_def_pts, remove_low_att_pts
 
 init(autoreset=True)
 
@@ -160,18 +161,6 @@ def _add_exclusion_constraint(m, x_d, solution):
             m.addConstr(var == solution[i], name=constr_name)
 
 
-def _add_min_defense_constraint(m, defense_cost, min_defense_cost):
-    if m.getConstrByName("def_cost_constr"):
-        m.remove(m.getConstrByName("def_cost_constr"))
-    m.addConstr(defense_cost >= min_defense_cost + 1e-5, "def_cost_constr")
-
-
-def _add_min_atack_constraint(m, attack_cost, min_attack_cost):
-    if m.getConstrByName("attack_cost_constr"):
-        m.remove(m.getConstrByName("attack_cost_constr"))
-    m.addConstr(attack_cost >= min_attack_cost + 1e-5, "attack_cost_constr")
-
-
 def no_good_cut_method(m, defense_cost, attack_cost):
     results = []
 
@@ -261,8 +250,14 @@ def run(filepath):
 
     results = no_good_cut_method(m, defense_cost, attack_cost)
 
-    results_pf = remove_low_att_pts("a", results)
-    results_pf = remove_dominated_pts("a", results_pf)
+    results_pf = remove_low_att_pts(results)
+    results_pf = remove_high_def_pts(results_pf)
+
+    # print(f"ini: {results_pf}")
+    # print(f"def: {remove_dominated_pts("d", results_pf)}")
+    # print(f"att: {remove_dominated_pts("a", results_pf)}")
+
+    results_pf = remove_dominated_pts("d", results_pf)
 
     if PRINT_PROGRESS:
         print(Fore.RED + f"Removed {list(set(results) - set(results_pf))}")
@@ -288,11 +283,11 @@ if __name__ == "__main__":
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
     #     time = run_average(filepath)
+    #     pf = run(filepath)[1]
+    #     print(pf)
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf, _, _ = run("./data/trees_w_assignments/tree_72.xml")
+    time, pf, _, _ = run("./data/trees_w_assignments/defensive_pareto_att.xml")
     print(pf)
     print("Time: {:.2f} ms.\n".format(time * 1000))
-
-    # cProfile.run('run(f"./data/trees_w_assignments/tree_24.xml")')
