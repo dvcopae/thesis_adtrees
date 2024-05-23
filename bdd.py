@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from timeit import default_timer as timer
 
 import dd.bdd as _bdd
@@ -19,8 +20,8 @@ init(autoreset=True)
 def _eval_path_cost(
     path: dict[str, bool],
     ba: BasicAssignment,
-    defenses: list[str],
-    attacks: list[str],
+    defenses: set[str],
+    attacks: set[str],
 ) -> tuple[float, float]:
     def_cost = sum(ba[d] for d in defenses if d in path and path[d])
     att_cost = sum(ba[a] for a in attacks if a in path and path[a])
@@ -33,7 +34,7 @@ pf_storage = {}
 def compute_pf_bu(
     bdd: _bdd.BDD,
     u: int,
-    defenses: list[str],
+    defenses: set[str],
     ba: BasicAssignment,
     goal: bool = True,
 ) -> list[tuple[float, float]]:
@@ -132,7 +133,7 @@ def compute_pf_all_paths(
 
         # Fill path with missing defenses, and keep track of
         # which defense configurations we encountered
-        for s in defenses + attacks:
+        for s in defenses.union(attacks):
             c.setdefault(s, False)
 
         prev_path = pf_dict.get(def_cost)
@@ -167,6 +168,36 @@ def compute_pf_all_paths(
     return pf
 
 
+def run_all_def(
+    boolean_expr: str,
+    defenses: set[str],
+    attacks: set[str],
+    ba: BasicAssignment,
+):
+
+    start = timer()
+    results = []
+    for def_vector in itertools.product([0, 1], repeat=len(defenses)):
+        def_expr = boolean_expr
+        def_dict = dict(zip(defenses, def_vector))
+        for k, v in def_dict.items():
+            def_expr = def_expr.replace(str(k), str(bool(v)))
+
+        bdd = _bdd.BDD()
+        bdd.declare(*attacks)
+        root = bdd.add_expr(def_expr)
+        def_cost = sum(ba[d] for d in defenses if d in def_dict and def_dict[d])
+
+        def_vector_pf = [(def_cost, a) for _, a in compute_pf_bu(bdd, root, [], ba)]
+        results.extend(def_vector_pf)
+
+    results = remove_low_att_pts(results)
+    results = remove_dominated_pts(results)
+
+    time_elapsed = timer() - start
+    return time_elapsed, results
+
+
 def run(filepath, method="bu", dump=False):
     # reset pf_Storage for bdd_bu
     global pf_storage
@@ -174,17 +205,21 @@ def run(filepath, method="bu", dump=False):
 
     ba = BasicAssignment(filepath)
     tree = ADTree(filepath)
-    defenses = tree.get_basic_actions("d")
-    attacks = tree.get_basic_actions("a")
+    defenses = set(tree.get_basic_actions("d"))
+    attacks = set(tree.get_basic_actions("a"))
 
     start = timer()
 
+    expr = tree.get_boolean_expression()
+
+    if method == "all_def":
+        return run_all_def(expr, defenses, attacks, ba)
+
     bdd = _bdd.BDD()
     bdd.configure(reordering=False)
-    bdd.declare(*(defenses + attacks))
-    expr = tree.get_boolean_expression()
+    bdd.declare(*(defenses.union(attacks)))
     root = bdd.add_expr(expr)
-    custom_order = {d: i for i, d in enumerate(defenses + attacks)}
+    custom_order = {d: i for i, d in enumerate(defenses.union(attacks))}
 
     if PRINT_PROGRESS:
         print(f"Initial size: {len(bdd)}")
@@ -208,7 +243,7 @@ def run(filepath, method="bu", dump=False):
     return elapsed_time, pf
 
 
-def run_average(filepath: str, no_runs: int = 100, method: str = "bu") -> float:
+def run_average(filepath: str, no_runs: int = 50, method: str = "bu") -> float:
     return sum(run(filepath, method)[0] for _ in range(0, no_runs)) / no_runs
 
 
@@ -228,8 +263,8 @@ if __name__ == "__main__":
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
     time, output = run(
-        "./data/trees_w_assignments/defensive_pareto_att.xml",
-        method="all_paths",
+        "./data/trees_w_assignments/tree_24.xml",
+        method="bu",
         dump=False,
     )
     print(output)
