@@ -30,23 +30,6 @@ def remove_dominated_pts(points):
     return pareto_front
 
 
-def remove_high_def_pts(points):
-    """
-    DEFENDER'S VIEW - Remove all points which have a higher defense cost for the same attack cost.
-    """
-    if not points:
-        return []
-
-    cost_dict = {}
-    for point in points:
-        def_cost = point[0]
-        att_cost = point[1]
-        if att_cost not in cost_dict or def_cost < cost_dict[att_cost]:
-            cost_dict[att_cost] = def_cost
-
-    return [(v, k) for k, v in cost_dict.items()]
-
-
 def remove_low_att_pts(points):
     """
     ATTACKER'S VIEW - Remove all points which have a lower attack cost for the same defense cost.
@@ -89,7 +72,8 @@ def read_results_from_csv(file_path):
     dummiest_values = []
     bilp_values = []
     bdd_bu_values = []
-    bdd_all_values = []
+    bdd_all_def_values = []
+    bu_values = []
     with open(file_path, encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
@@ -105,6 +89,16 @@ def read_results_from_csv(file_path):
                 bdd_bu_values.append(float(row[3]))
 
             if row[4] != "":
-                bdd_all_values.append(float(row[4]))
+                bdd_all_def_values.append(float(row[4]))
 
-    return x_labels, dummiest_values, bilp_values, bdd_bu_values, bdd_all_values
+            if row[5] != "":
+                bu_values.append(float(row[5]))
+
+    return (
+        x_labels,
+        dummiest_values,
+        bilp_values,
+        bdd_bu_values,
+        bdd_all_def_values,
+        bu_values,
+    )

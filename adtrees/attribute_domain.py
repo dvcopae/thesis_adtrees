@@ -11,7 +11,6 @@ from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
 from utils.util import remove_dominated_pts
-from utils.util import remove_high_def_pts
 from utils.util import remove_low_att_pts
 
 init(autoreset=True)
@@ -113,7 +112,6 @@ class AttrDomain:
             pts.extend(reduced_candidates)
 
         pts = remove_low_att_pts(pts)
-        pts = remove_high_def_pts(pts)
         pts = remove_dominated_pts(pts)
 
         return pts

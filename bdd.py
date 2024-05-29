@@ -11,7 +11,6 @@ from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
 from utils.util import remove_dominated_pts
-from utils.util import remove_high_def_pts
 from utils.util import remove_low_att_pts
 
 init(autoreset=True)
@@ -20,8 +19,8 @@ init(autoreset=True)
 def _eval_path_cost(
     path: dict[str, bool],
     ba: BasicAssignment,
-    defenses: set[str],
-    attacks: set[str],
+    defenses: list[str],
+    attacks: list[str],
 ) -> tuple[float, float]:
     def_cost = sum(ba[d] for d in defenses if d in path and path[d])
     att_cost = sum(ba[a] for a in attacks if a in path and path[a])
@@ -34,7 +33,7 @@ pf_storage = {}
 def compute_pf_bu(
     bdd: _bdd.BDD,
     u: int,
-    defenses: set[str],
+    defenses: list[str],
     ba: BasicAssignment,
     goal: bool = True,
 ) -> list[tuple[float, float]]:
@@ -70,7 +69,7 @@ def compute_pf_bu(
 
     pf = pf_left + pf_right
 
-    if is_defense:
+    if is_defense:  # necessary for counter_example_dag
         pf = remove_low_att_pts(pf)
 
     pf = remove_dominated_pts(pf)
@@ -133,7 +132,7 @@ def compute_pf_all_paths(
 
         # Fill path with missing defenses, and keep track of
         # which defense configurations we encountered
-        for s in defenses.union(attacks):
+        for s in defenses + attacks:
             c.setdefault(s, False)
 
         prev_path = pf_dict.get(def_cost)
@@ -161,7 +160,7 @@ def compute_pf_all_paths(
         (_eval_path_cost(p, ba, defenses, attacks)[0], float("inf"))
         for p in infinity_paths
     ]
-    pf.extend(remove_high_def_pts(infinity_costs))
+    pf.extend(infinity_costs)
 
     pf = remove_low_att_pts(pf)
     pf = remove_dominated_pts(pf)
@@ -170,8 +169,8 @@ def compute_pf_all_paths(
 
 def run_all_def(
     boolean_expr: str,
-    defenses: set[str],
-    attacks: set[str],
+    defenses: list[str],
+    attacks: list[str],
     ba: BasicAssignment,
 ):
 
@@ -205,8 +204,8 @@ def run(filepath, method="bu", dump=False):
 
     ba = BasicAssignment(filepath)
     tree = ADTree(filepath)
-    defenses = set(tree.get_basic_actions("d"))
-    attacks = set(tree.get_basic_actions("a"))
+    defenses = tree.get_basic_actions("d")
+    attacks = tree.get_basic_actions("a")
 
     start = timer()
 
@@ -217,9 +216,9 @@ def run(filepath, method="bu", dump=False):
 
     bdd = _bdd.BDD()
     bdd.configure(reordering=False)
-    bdd.declare(*(defenses.union(attacks)))
+    bdd.declare(*(defenses + attacks))
     root = bdd.add_expr(expr)
-    custom_order = {d: i for i, d in enumerate(defenses.union(attacks))}
+    custom_order = {d: i for i, d in enumerate(defenses + attacks)}
 
     if PRINT_PROGRESS:
         print(f"Initial size: {len(bdd)}")
@@ -251,19 +250,19 @@ PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96]:
     #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
-    #     time = run_average(filepath, NO_RUNS=1, method="bu")
+    #     time = run_average(filepath, no_runs=1, method="bu")
     #     _, pf = run(filepath)
     #     print(pf)
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
     time, output = run(
-        "./data/trees_w_assignments/tree_24.xml",
+        "./data/trees_w_assignments/counter_example_dag.xml",
         method="bu",
         dump=False,
     )

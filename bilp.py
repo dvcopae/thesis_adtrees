@@ -14,7 +14,6 @@ from adtrees.adnode import ADNode
 from adtrees.adtree import ADTree
 from adtrees.basic_assignment import BasicAssignment
 from utils.util import remove_dominated_pts
-from utils.util import remove_high_def_pts
 from utils.util import remove_low_att_pts
 
 init(autoreset=True)
@@ -123,8 +122,12 @@ def get_model(
             inh_label = get_inh_label(ad_node, countered)
             # x_INH is attack * (1-counterattack)
             m.addConstr(
-                x_inh_node == model_node * (1 - get_model_node(countered)),
+                x_inh_node <= 1 - get_model_node(countered),
                 name=f"{inh_label}_ON",
+            )
+            m.addConstr(
+                x_inh_node >= model_node - get_model_node(countered),
+                name=f"{inh_label}_IDK",
             )
             # x_INH is 0 when attack is 0
             m.addConstr(x_inh_node <= model_node, name=f"{inh_label}_OFF")
@@ -165,8 +168,8 @@ def get_model(
 
     m.update()
 
-    if dump:
-        m.write("model.lp")
+    # if dump:
+    m.write("model.lp")
 
     return m, defense_cost, attack_cost
 
@@ -269,7 +272,6 @@ def run(filepath: str) -> tuple[float, list[tuple[float, float]], int, int]:
     results = compute_pf(m, defense_cost)
 
     results = remove_low_att_pts(results)
-    results = remove_high_def_pts(results)
     results = remove_dominated_pts(results)
 
     if PRINT_PROGRESS:
@@ -279,7 +281,7 @@ def run(filepath: str) -> tuple[float, list[tuple[float, float]], int, int]:
     return time_elapsed, results, T.subtree_size(), len(T.get_basic_actions("d"))
 
 
-def run_average(filepath, no_runs=10):
+def run_average(filepath, no_runs=1):
     warmup_bilp()
     return sum(run(filepath)[0] for _ in range(0, no_runs)) / no_runs
 
@@ -289,7 +291,7 @@ PRINT_PROGRESS = False
 if __name__ == "__main__":
     print("===== BILP =====\n")
 
-    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54]:
+    # for i in [6, 12, 18, 24, 30, 36, 42]:
     #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
@@ -300,6 +302,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf, _, _ = run("./data/trees_w_assignments/defensive_pareto_att.xml")
+    time, pf, _, _ = run("./data/trees_w_assignments/defensive_pareto_deff.xml")
     print(pf)
     print(f"Time: {time * 1000:.2f} ms.\n")
