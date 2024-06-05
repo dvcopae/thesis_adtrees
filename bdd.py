@@ -35,6 +35,7 @@ def compute_pf_bu(
     u: int,
     defenses: list[str],
     ba: BasicAssignment,
+    root_type: str,
     goal: bool = True,
 ) -> list[tuple[float, float]]:
     # Avoid revisiting nodes
@@ -49,14 +50,17 @@ def compute_pf_bu(
 
     # terminal ?
     if p == 1:
-        return [(0, 0)] if goal else [(0, float("inf"))]
+        if root_type == "a":
+            return [(0, 0)] if goal else [(0, float("inf"))]
+        else:
+            return [(0, float("inf"))] if goal else [(0, 0)]
 
     # non-terminal
     i, v, w = bdd._succ[p]
     assert v and w, "Invalid BDD structure"
 
-    pf_left = compute_pf_bu(bdd, v, defenses, ba, goal)
-    pf_right = compute_pf_bu(bdd, w, defenses, ba, goal)
+    pf_left = compute_pf_bu(bdd, v, defenses, ba, root_type, goal)
+    pf_right = compute_pf_bu(bdd, w, defenses, ba, root_type, goal)
 
     # Taking a `right` edge means we activated `u`, so add it's cost
     u_label = bdd._level_to_var[i]
@@ -172,6 +176,7 @@ def run_all_def(
     defenses: list[str],
     attacks: list[str],
     ba: BasicAssignment,
+    root_type: str,
 ):
 
     start = timer()
@@ -187,7 +192,9 @@ def run_all_def(
         root = bdd.add_expr(def_expr)
         def_cost = sum(ba[d] for d in defenses if d in def_dict and def_dict[d])
 
-        def_vector_pf = [(def_cost, a) for _, a in compute_pf_bu(bdd, root, [], ba)]
+        def_vector_pf = [
+            (def_cost, a) for _, a in compute_pf_bu(bdd, root, [], ba, root_type)
+        ]
         results.extend(def_vector_pf)
 
     results = remove_low_att_pts(results)
@@ -212,7 +219,7 @@ def run(filepath, method="bu", dump=False):
     expr = tree.get_boolean_expression()
 
     if method == "all_def":
-        return run_all_def(expr, defenses, attacks, ba)
+        return run_all_def(expr, defenses, attacks, ba, tree.root.type)
 
     bdd = _bdd.BDD()
     bdd.configure(reordering=False)
@@ -233,7 +240,7 @@ def run(filepath, method="bu", dump=False):
 
     pf = []
     if method == "bu":
-        pf = compute_pf_bu(bdd, root, defenses, ba)
+        pf = compute_pf_bu(bdd, root, defenses, ba, tree.root.type)
     elif method == "all_paths":
         pf = compute_pf_all_paths(bdd, root, ba, defenses, attacks)
 
@@ -255,16 +262,16 @@ if __name__ == "__main__":
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
-    #     time = run_average(filepath, no_runs=1, method="bu")
+    #     time = run_average(filepath, no_runs=1, method="all_paths")
     #     _, pf = run(filepath)
     #     print(pf)
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
     time, output = run(
-        "./data/trees_w_assignments/counter_example_dag.xml",
+        "./data/trees_w_assignments/exponential_pf.xml",
         method="bu",
-        dump=False,
+        dump=True,
     )
     print(output)
     print(f"Time: {time * 1000:.2f} ms.\n")

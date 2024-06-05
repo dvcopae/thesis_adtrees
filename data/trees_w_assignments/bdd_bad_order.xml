@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<adtree>
+	<node refinement="disjunctive" switchRole="yes">
+		<label>Breaking and Entering</label>
+		<node refinement="conjunctive">
+			<label>d_1</label>
+			<parameter domainId="MinCost1" category="basic">2.0</parameter>
+			<node refinement="disjunctive" switchRole="yes">
+				<label>a_1</label>
+				<parameter domainId="MinCost1" category="basic">2.0</parameter>
+			</node>
+		</node>
+		<node refinement="disjunctive">
+			<label>d_2</label>
+			<parameter domainId="MinCost1" category="basic">4.0</parameter>
+			<node refinement="disjunctive" switchRole="yes">
+				<label>a_2</label>
+				<parameter domainId="MinCost1" category="basic">4.0</parameter>
+			</node>
+		</node>
+	</node>
+	<domain id="MinCost1">
+		<class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+		<tool>ADTool2</tool>
+	</domain>
+</adtree>

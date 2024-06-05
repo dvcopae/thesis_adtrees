@@ -17,6 +17,9 @@ def remove_dominated_pts(points):
     # If actor = 'd', sort first based on defense, and then on attack.
     sorted_points = sorted(points, key=itemgetter(0, 1))
 
+    # Ascending defenses, descending attacks
+    # sorted_points = sorted(points, key=lambda point: (point[0], -point[1]))
+
     pareto_front = [sorted_points[0]]
 
     for point in sorted_points[1:]:

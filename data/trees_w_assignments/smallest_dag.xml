@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<adtree>
+	<node refinement="disjunctive">
+		<label>A_OR_1</label>
+		<node refinement="conjunctive">
+			<label>a2</label>
+			<parameter domainId="MinCost1" category="basic">2.0</parameter>
+			<node refinement="conjunctive" switchRole="yes">
+				<label>d1</label>
+				<parameter domainId="MinCost1" category="basic">1.0</parameter>
+			</node>
+		</node>
+		<node refinement="conjunctive">
+			<label>a1</label>
+			<parameter domainId="MinCost1" category="basic">1.0</parameter>
+			<node refinement="disjunctive" switchRole="yes">
+				<label>d1</label>
+				<parameter domainId="MinCost1" category="basic">1.0</parameter>
+			</node>
+		</node>
+	</node>
+	<domain id="MinCost1">
+		<class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+		<tool>ADTool2</tool>
+	</domain>
+</adtree>
