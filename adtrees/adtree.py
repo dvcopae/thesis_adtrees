@@ -208,13 +208,15 @@ class ADTree:
         return self.dict[node]
 
     def subtree_size(self):
-        children = 0
 
         new_tree = deepcopy(self)
+        children = 1  # count self
 
         unvisited = new_tree.get_children(new_tree.root)
         while unvisited:
             current = unvisited.pop(0)
+            if new_tree.is_countered(current):
+                children += 1
             children += 1
             unvisited.extend(new_tree.get_children(current))
 

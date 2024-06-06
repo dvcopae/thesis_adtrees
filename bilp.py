@@ -291,7 +291,7 @@ PRINT_PROGRESS = False
 if __name__ == "__main__":
     print("===== BILP =====\n")
 
-    # for i in [6, 12, 18, 24, 30, 36, 42]:
+    # for i in [9, 17, 25, 33, 41, 49, 57]:
     #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 

@@ -269,7 +269,7 @@ PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    for i in [90, 96]:
+    for i in [113, 121, 129]:
         filepath = f"./data/trees_w_assignments/tree_{i}.xml"
         print(os.path.basename(filepath))
 

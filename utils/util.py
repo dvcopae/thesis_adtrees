@@ -76,6 +76,7 @@ def read_results_from_csv(file_path):
     bdd_bu_values = []
     bdd_all_def_values = []
     bu_values = []
+    bdd_all_paths_values = []
     with open(file_path, encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
@@ -96,6 +97,9 @@ def read_results_from_csv(file_path):
             if row[5] != "":
                 bu_values.append(float(row[5]))
 
+            if row[6] != "":
+                bdd_all_paths_values.append(float(row[6]))
+
     return (
         x_labels,
         dummiest_values,
@@ -103,4 +107,5 @@ def read_results_from_csv(file_path):
         bdd_bu_values,
         bdd_all_def_values,
         bu_values,
+        bdd_all_paths_values,
     )

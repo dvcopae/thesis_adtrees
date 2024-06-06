@@ -42,24 +42,26 @@ def plot_results(
     bdd_bu_values,
     bdd_all_def_values,
     bu_values,
+    bdd_all_paths,
 ):
-    plt.figure(figsize=(14, 6))
+    plt.figure(figsize=(10, 6))
 
     plt.yscale("log")
     plt.xlabel("Tree size(defenses)")
     plt.xticks(range(len(x_labels)), x_labels)
-    # plt.xticks(rotation=90)
+    plt.xticks(rotation=90)
     plt.ylabel("Runtime (ms)")
 
-    plot(range(min(len(x_labels), len(dummiest_values))), dummiest_values, "dummiest")
-    plot(range(min(len(x_labels), len(bilp_values))), bilp_values, "bilp")
+    plot(range(min(len(x_labels), len(bu_values))), bu_values, "BU")
+    plot(range(min(len(x_labels), len(dummiest_values))), dummiest_values, "Naive")
+    plot(range(min(len(x_labels), len(bilp_values))), bilp_values, "BILP")
+    plot(range(min(len(x_labels), len(bdd_all_paths))), bdd_all_paths, "BDD_PATHS")
     plot(
         range(min(len(x_labels), len(bdd_all_def_values))),
         bdd_all_def_values,
-        "bdd_all_def",
+        "BDD_ALL_DEF",
     )
-    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "bdd_bu")
-    plot(range(min(len(x_labels), len(bu_values))), bu_values, "bu")
+    plot(range(min(len(x_labels), len(bdd_bu_values))), bdd_bu_values, "BDD_BU")
 
     plt.legend(loc="best")
     plt.tight_layout()
@@ -67,7 +69,7 @@ def plot_results(
 
 
 if __name__ == "__main__":
-    labels, dummy, bilp, bdd_bu, bdd_all_def, bu = read_results_from_csv(
+    labels, dummy, bilp, bdd_bu, bdd_all_def, bu, bdd_all_paths = read_results_from_csv(
         "./benchmarking/algorithm_linear.csv",
     )
-    plot_results(labels, dummy, bilp, bdd_bu, bdd_all_def, bu)
+    plot_results(labels, dummy, bilp, bdd_bu, bdd_all_def, bu, bdd_all_paths)

@@ -1,0 +1,230 @@
+<adtree>
+  <node refinement="conjunctive">
+    <label>OR1</label>
+    <node refinement="conjunctive">
+      <label>a2</label>
+      <parameter domainId="MinCost1" category="basic">91946</parameter>
+      <node refinement="conjunctive" switchRole="yes">
+        <label>AND1</label>
+        <node refinement="conjunctive">
+          <label>d1</label>
+          <parameter domainId="MinCost1" category="basic">66386</parameter>
+        </node>
+        <node refinement="conjunctive">
+          <label>AJZUjlBxMQ</label>
+          <node refinement="conjunctive">
+            <label>aVBbWns3W5</label>
+            <parameter domainId="MinCost1" category="basic">58050</parameter>
+            <node refinement="conjunctive" switchRole="yes">
+              <label>1SN9cuAcs2</label>
+              <node refinement="conjunctive">
+                <label>qzLQxUFqCM</label>
+                <node refinement="conjunctive">
+                  <label>ZfsB0iXVzq</label>
+                  <parameter domainId="MinCost1" category="basic">69829</parameter>
+                  <node refinement="conjunctive" switchRole="yes">
+                    <label>AvlJLFvtZr</label>
+                    <node refinement="conjunctive">
+                      <label>lr4F5w07w4</label>
+                      <parameter domainId="MinCost1" category="basic">64269</parameter>
+                    </node>
+                    <node refinement="conjunctive">
+                      <label>ACVgnoTurd</label>
+                      <parameter domainId="MinCost1" category="basic">71345</parameter>
+                    </node>
+                    <node refinement="conjunctive" switchRole="yes">
+                      <label>YjeRUd9c9g</label>
+                      <parameter domainId="MinCost1" category="basic">47785</parameter>
+                    </node>
+                  </node>
+                </node>
+                <node refinement="conjunctive">
+                  <label>ftTd1vvH26</label>
+                  <node refinement="conjunctive">
+                    <label>hhZ8UQUu2S</label>
+                    <parameter domainId="MinCost1" category="basic">75991</parameter>
+                    <node refinement="conjunctive" switchRole="yes">
+                      <label>wK25xgF1IG</label>
+                      <node refinement="conjunctive">
+                        <label>varcU2aiHN</label>
+                        <parameter domainId="MinCost1" category="basic">38854</parameter>
+                      </node>
+                      <node refinement="conjunctive">
+                        <label>qWELhMgA8E</label>
+                        <node refinement="conjunctive">
+                          <label>rS4cstwZ00</label>
+                          <parameter domainId="MinCost1" category="basic">58313</parameter>
+                          <node refinement="conjunctive" switchRole="yes">
+                            <label>zu5ocDe57y</label>
+                            <node refinement="conjunctive">
+                              <label>Xd9qOYAi5k</label>
+                              <node refinement="conjunctive">
+                                <label>i9uDd3wLTF</label>
+                                <parameter domainId="MinCost1" category="basic">63690</parameter>
+                                <node refinement="conjunctive" switchRole="yes">
+                                  <label>1OlOsPApIk</label>
+                                  <node refinement="conjunctive">
+                                    <label>G5ApJpZxkE</label>
+                                    <node refinement="conjunctive">
+                                      <label>7pU0YI511A</label>
+                                      <parameter domainId="MinCost1" category="basic">29975</parameter>
+                                      <node refinement="conjunctive" switchRole="yes">
+                                        <label>Bj5HuTuQND</label>
+                                        <node refinement="conjunctive">
+                                          <label>68uGCPbOFm</label>
+                                          <node refinement="conjunctive">
+                                            <label>VhltlIyOYC</label>
+                                            <parameter domainId="MinCost1" category="basic">17226</parameter>
+                                            <node refinement="conjunctive" switchRole="yes">
+                                              <label>y9d6x4MDKA</label>
+                                              <node refinement="conjunctive">
+                                                <label>XUUfBy2NmP</label>
+                                                <parameter domainId="MinCost1" category="basic">97715</parameter>
+                                              </node>
+                                              <node refinement="conjunctive">
+                                                <label>cnE0P23kef</label>
+                                                <parameter domainId="MinCost1" category="basic">77784</parameter>
+                                              </node>
+                                              <node refinement="conjunctive" switchRole="yes">
+                                                <label>ydAs6UCwPI</label>
+                                                <parameter domainId="MinCost1" category="basic">33797</parameter>
+                                              </node>
+                                            </node>
+                                          </node>
+                                          <node refinement="conjunctive">
+                                            <label>jTFlregDi5</label>
+                                            <parameter domainId="MinCost1" category="basic">92276</parameter>
+                                          </node>
+                                        </node>
+                                        <node refinement="conjunctive">
+                                          <label>5uBD1VAqlJ</label>
+                                          <node refinement="conjunctive">
+                                            <label>Aw0d71BBOr</label>
+                                            <parameter domainId="MinCost1" category="basic">63811</parameter>
+                                            <node refinement="conjunctive" switchRole="yes">
+                                              <label>62UjH1cnGN</label>
+                                              <node refinement="conjunctive">
+                                                <label>Ma0oMy20vX</label>
+                                                <parameter domainId="MinCost1" category="basic">11339</parameter>
+                                              </node>
+                                              <node refinement="conjunctive">
+                                                <label>D0xbdUaqFk</label>
+                                                <parameter domainId="MinCost1" category="basic">18309</parameter>
+                                              </node>
+                                              <node refinement="conjunctive" switchRole="yes">
+                                                <label>iPfPMeAVl8</label>
+                                                <parameter domainId="MinCost1" category="basic">5098</parameter>
+                                              </node>
+                                            </node>
+                                          </node>
+                                          <node refinement="conjunctive">
+                                            <label>SAi9aJ0OJS</label>
+                                            <parameter domainId="MinCost1" category="basic">45127</parameter>
+                                          </node>
+                                        </node>
+                                        <node refinement="conjunctive" switchRole="yes">
+                                          <label>boatjeieCF</label>
+                                          <parameter domainId="MinCost1" category="basic">12263</parameter>
+                                        </node>
+                                      </node>
+                                    </node>
+                                    <node refinement="conjunctive">
+                                      <label>DWaXydOhKG</label>
+                                      <parameter domainId="MinCost1" category="basic">99756</parameter>
+                                    </node>
+                                  </node>
+                                  <node refinement="conjunctive">
+                                    <label>ULGbdZsNBk</label>
+                                    <parameter domainId="MinCost1" category="basic">25326</parameter>
+                                  </node>
+                                  <node refinement="conjunctive" switchRole="yes">
+                                    <label>VYLeRE0NTP</label>
+                                    <parameter domainId="MinCost1" category="basic">85523</parameter>
+                                  </node>
+                                </node>
+                              </node>
+                              <node refinement="conjunctive">
+                                <label>Os0x1rDYUQ</label>
+                                <parameter domainId="MinCost1" category="basic">69970</parameter>
+                              </node>
+                            </node>
+                            <node refinement="conjunctive">
+                              <label>8H9pEufz0o</label>
+                              <parameter domainId="MinCost1" category="basic">44613</parameter>
+                            </node>
+                            <node refinement="conjunctive" switchRole="yes">
+                              <label>RrqI4A44Ah</label>
+                              <parameter domainId="MinCost1" category="basic">51974</parameter>
+                            </node>
+                          </node>
+                        </node>
+                        <node refinement="conjunctive">
+                          <label>lx07TW38uR</label>
+                          <node refinement="conjunctive">
+                            <label>95YZMPv0ed</label>
+                            <parameter domainId="MinCost1" category="basic">43331</parameter>
+                            <node refinement="conjunctive" switchRole="yes">
+                              <label>RaB12cDYvI</label>
+                              <node refinement="conjunctive">
+                                <label>rDONUokw7j</label>
+                                <parameter domainId="MinCost1" category="basic">23910</parameter>
+                              </node>
+                              <node refinement="conjunctive">
+                                <label>MqqpEgNjuT</label>
+                                <parameter domainId="MinCost1" category="basic">16762</parameter>
+                              </node>
+                              <node refinement="conjunctive" switchRole="yes">
+                                <label>9njTVoND9B</label>
+                                <parameter domainId="MinCost1" category="basic">39796</parameter>
+                              </node>
+                            </node>
+                          </node>
+                          <node refinement="conjunctive">
+                            <label>dg1d2nqkzh</label>
+                            <parameter domainId="MinCost1" category="basic">73894</parameter>
+                          </node>
+                        </node>
+                      </node>
+                      <node refinement="conjunctive" switchRole="yes">
+                        <label>xPMikisNtF</label>
+                        <parameter domainId="MinCost1" category="basic">47077</parameter>
+                      </node>
+                    </node>
+                  </node>
+                  <node refinement="conjunctive">
+                    <label>fKrGHGUAmQ</label>
+                    <parameter domainId="MinCost1" category="basic">19409</parameter>
+                  </node>
+                </node>
+              </node>
+              <node refinement="conjunctive">
+                <label>Dy8kC0UKdi</label>
+                <parameter domainId="MinCost1" category="basic">27792</parameter>
+              </node>
+              <node refinement="conjunctive" switchRole="yes">
+                <label>sA7QXYClwS</label>
+                <parameter domainId="MinCost1" category="basic">90337</parameter>
+              </node>
+            </node>
+          </node>
+          <node refinement="conjunctive">
+            <label>0cMQmWZlRd</label>
+            <parameter domainId="MinCost1" category="basic">65273</parameter>
+          </node>
+        </node>
+        <node refinement="conjunctive" switchRole="yes">
+          <label>a1</label>
+          <parameter domainId="MinCost1" category="basic">65699</parameter>
+        </node>
+      </node>
+    </node>
+    <node refinement="conjunctive">
+      <label>a3</label>
+      <parameter domainId="MinCost1" category="basic">74628</parameter>
+    </node>
+  </node>
+  <domain id="MinCost1">
+    <class>lu.uni.adtool.domains.adtpredefined.MinCost</class>
+    <tool>ADTool2</tool>
+  </domain>
+</adtree>
