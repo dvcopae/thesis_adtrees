@@ -271,7 +271,7 @@ def run(filepath: str) -> tuple[float, list[tuple[float, float]], int, int]:
 
     results = compute_pf(m, defense_cost)
 
-    results = remove_low_att_pts(results)
+    # results = remove_low_att_pts(results)
     results = remove_dominated_pts(results)
 
     if PRINT_PROGRESS:
@@ -302,6 +302,6 @@ if __name__ == "__main__":
 
     #     print("Time: {:.2f} ms.\n".format(time * 1000))
 
-    time, pf, _, _ = run("./data/trees_w_assignments/defensive_pareto_deff.xml")
+    time, pf, _, _ = run("./data/trees_w_assignments/counter_example_dag.xml")
     print(pf)
     print(f"Time: {time * 1000:.2f} ms.\n")

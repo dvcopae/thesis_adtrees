@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from copy import deepcopy
 from timeit import default_timer as timer
 
@@ -56,17 +55,17 @@ def run_average(method, filepath, NO_RUNS=1):
 PRINT_PROGRESS = False
 
 if __name__ == "__main__":
-    for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96]:
-        filepath = f"./data/trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96]:
+    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average("bu", filepath)
-        _, pf = run("bu", filepath)
-        print(pf)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average("bu", filepath)
+    #     _, pf = run("bu", filepath)
+    #     print(pf)
 
-        print(f"Time: {time * 1000:.2f} ms.\n")
+    #     print(f"Time: {time * 1000:.2f} ms.\n")
 
-    # time, output = run("dummiest", "./data/trees_w_assignments/counter_example_dag.xml")
-    # print(output)
-    # print(f"Time: {time * 1000:.2f} ms.\n")
+    time, output = run("dummiest", "./data/trees_w_assignments/counter_example_dag.xml")
+    print(output)
+    print(f"Time: {time * 1000:.2f} ms.\n")

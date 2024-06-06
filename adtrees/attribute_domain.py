@@ -81,7 +81,7 @@ class AttrDomain:
         all_attacks = tree.get_basic_actions("a")
 
         for active_defs in powerset(all_defenses):
-            pts_candidates = []
+            att_costs = []
             def_cost = sum([ba[d] for d in all_defenses if d in active_defs])
 
             for active_atts in powerset(all_attacks):
@@ -98,20 +98,20 @@ class AttrDomain:
                 if tree.is_strategy_successful(activation_map):  # successful
                     att_cost = sum([ba[a] for a in all_attacks if a in active_atts])
 
-                    pts_candidates.append((def_cost, att_cost))
+                    att_costs.append(att_cost)
 
-            reduced_candidates = (
-                [(def_cost, float("inf"))]
-                if len(pts_candidates) == 0
-                else remove_dominated_pts(pts_candidates)
+            pair = (
+                (def_cost, float("inf"))
+                if len(att_costs) == 0
+                else (def_cost, min(att_costs))
             )
 
             if print_progress:
-                print(f"Added for defense {active_defs} : {reduced_candidates}")
+                print(f"Added for defense {active_defs} : {pair}")
 
-            pts.extend(reduced_candidates)
+            pts.append(pair)
 
-        pts = remove_low_att_pts(pts)
+        # pts = remove_low_att_pts(pts)
         pts = remove_dominated_pts(pts)
 
         return pts

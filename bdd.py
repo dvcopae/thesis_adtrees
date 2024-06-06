@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 from timeit import default_timer as timer
 
 import dd.bdd as _bdd
@@ -74,9 +75,17 @@ def compute_pf_bu(
     pf = pf_left + pf_right
 
     if is_defense:  # necessary for counter_example_dag
-        pf = remove_low_att_pts(pf)
+        pf = remove_dominated_pts(pf)
+    else:
+        cost_dict = {}
+        for point in pf:
+            def_cost = point[0]
+            att_cost = point[1]
+            if def_cost not in cost_dict or att_cost < cost_dict[def_cost]:
+                cost_dict[def_cost] = att_cost
 
-    pf = remove_dominated_pts(pf)
+        pf = list(cost_dict.items())
+
     pf_storage[u] = pf
 
     return pf
@@ -85,7 +94,7 @@ def compute_pf_bu(
 failed_paths = []
 
 
-def find_all_paths_bdd(bdd: _bdd.BDD, u, path=None, goal=True):
+def find_all_paths_bdd(bdd: _bdd.BDD, u, root_type: str, path=None, goal=True):
     """Recurse to enumerate models."""
 
     if not path:
@@ -100,7 +109,10 @@ def find_all_paths_bdd(bdd: _bdd.BDD, u, path=None, goal=True):
     # terminal ?
     if p == 1:
         path_dict = {bdd._level_to_var[i]: v for i, v in path.items()}
-        if goal:
+
+        goal_is_reached = goal if root_type == "a" else not goal
+
+        if goal_is_reached:
             yield path_dict
         else:
             failed_paths.append(path_dict)
@@ -116,8 +128,8 @@ def find_all_paths_bdd(bdd: _bdd.BDD, u, path=None, goal=True):
     path_u_true = dict(path)
     path_u_true[i] = True
 
-    yield from find_all_paths_bdd(bdd, v, path_u_false, goal)
-    yield from find_all_paths_bdd(bdd, w, path_u_true, goal)
+    yield from find_all_paths_bdd(bdd, v, root_type, path_u_false, goal)
+    yield from find_all_paths_bdd(bdd, w, root_type, path_u_true, goal)
 
 
 def compute_pf_all_paths(
@@ -126,12 +138,13 @@ def compute_pf_all_paths(
     ba: BasicAssignment,
     defenses: list[str],
     attacks: list[str],
+    root_type: str,
 ) -> list[tuple[float, float]]:
     global failed_paths
     pf_dict = {}
     failed_paths = []
 
-    for c in find_all_paths_bdd(bdd, root):
+    for c in find_all_paths_bdd(bdd, root, root_type):
         def_cost, att_cost = _eval_path_cost(c, ba, defenses, attacks)
 
         # Fill path with missing defenses, and keep track of
@@ -166,7 +179,6 @@ def compute_pf_all_paths(
     ]
     pf.extend(infinity_costs)
 
-    pf = remove_low_att_pts(pf)
     pf = remove_dominated_pts(pf)
     return pf
 
@@ -242,7 +254,7 @@ def run(filepath, method="bu", dump=False):
     if method == "bu":
         pf = compute_pf_bu(bdd, root, defenses, ba, tree.root.type)
     elif method == "all_paths":
-        pf = compute_pf_all_paths(bdd, root, ba, defenses, attacks)
+        pf = compute_pf_all_paths(bdd, root, ba, defenses, attacks, tree.root.type)
 
     elapsed_time = timer() - start
 
@@ -257,21 +269,21 @@ PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    # for i in [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96]:
-    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
-    #     print(os.path.basename(filepath))
+    for i in [90, 96]:
+        filepath = f"./data/trees_w_assignments/tree_{i}.xml"
+        print(os.path.basename(filepath))
 
-    #     # Average time over `NO_RUNS`, excluding the time to read the tree
-    #     time = run_average(filepath, no_runs=1, method="all_paths")
-    #     _, pf = run(filepath)
-    #     print(pf)
+        # Average time over `NO_RUNS`, excluding the time to read the tree
+        time = run_average(filepath, no_runs=1, method="all_paths")
+        _, pf = run(filepath)
+        print(pf)
 
-    #     print("Time: {:.2f} ms.\n".format(time * 1000))
+        print(f"Time: {time * 1000:.2f} ms.\n")
 
-    time, output = run(
-        "./data/trees_w_assignments/exponential_pf.xml",
-        method="bu",
-        dump=True,
-    )
-    print(output)
-    print(f"Time: {time * 1000:.2f} ms.\n")
+    # time, output = run(
+    #     "./data/trees_w_assignments/counter_example_dag.xml",
+    #     method="bu",
+    #     dump=True,
+    # )
+    # print(output)
+    # print(f"Time: {time * 1000:.2f} ms.\n")

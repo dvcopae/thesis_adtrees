@@ -4,7 +4,6 @@ import csv
 import re
 import secrets
 import string
-from operator import itemgetter
 
 
 def remove_dominated_pts(points):
@@ -15,10 +14,10 @@ def remove_dominated_pts(points):
         return []
 
     # If actor = 'd', sort first based on defense, and then on attack.
-    sorted_points = sorted(points, key=itemgetter(0, 1))
+    # sorted_points = sorted(points, key=itemgetter(0, 1))
 
     # Ascending defenses, descending attacks
-    # sorted_points = sorted(points, key=lambda point: (point[0], -point[1]))
+    sorted_points = sorted(points, key=lambda point: (point[0], -point[1]))
 
     pareto_front = [sorted_points[0]]
 
