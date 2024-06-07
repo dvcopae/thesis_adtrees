@@ -19,6 +19,7 @@ def save_results_to_csv(
     bdd_bu_values,
     bdd_all_values,
     bu_values,
+    bdd_paths,
 ):
     with open(
         "./benchmarking/algorithm_results.csv",
@@ -28,7 +29,15 @@ def save_results_to_csv(
     ) as file:
         writer = csv.writer(file)
         writer.writerow(
-            ["Tree Size(Defenses)", "Dummiest", "BILP", "BDD-BU", "BDD-ALL-DEF", "BU"],
+            [
+                "Tree Size(Defenses)",
+                "Dummiest",
+                "BILP",
+                "BDD-BU",
+                "BDD-ALL-DEF",
+                "BU",
+                "BDD-PATHS",
+            ],
         )
 
         for i, label in enumerate(labels):
@@ -40,12 +49,13 @@ def save_results_to_csv(
                     bdd_bu_values[i] if i < len(bdd_bu_values) else None,
                     bdd_all_values[i] if i < len(bdd_all_values) else None,
                     bu_values[i] if i < len(bu_values) else None,
+                    bdd_paths[i] if i < len(bdd_paths) else None,
                 ],
             )
 
 
 def eval_bu(file):
-    time = run_bu("bu", file, 50)
+    time = run_bu("bu", file, 1)
     print(f"BU - finished {file}")
     return round(time * 1000, 2)
 
@@ -63,7 +73,7 @@ def eval_bilp(file):
 
 
 def eval_bdd_bu(file):
-    time = run_bdd(file, 50, "bu")
+    time = run_bdd(file, 1, "bu")
     print(f"BDD-BU - finished {file}")
     return round(time * 1000, 2)
 
@@ -93,30 +103,37 @@ if __name__ == "__main__":
     random_tree_files = [
         join(RANDOM_TREES_PATH, f)
         for f in listdir(RANDOM_TREES_PATH)
-        if isfile(join(RANDOM_TREES_PATH, f))
+        if isfile(join(RANDOM_TREES_PATH, f)) and not f.startswith(".")
     ]
 
-    files = tree_linear_files
+    files = random_tree_files
 
     labels = []
     dummiest = []
     bilp = []
     bdd_bu = []
-    bdd_all = []
+    bdd_all_def = []
     bu = []
+    bdd_paths = []
+
+    # for f in files:
+    #     bdd_bu.append(eval_bdd_bu(f))
+
+    # for f in files:
+    #     bu.append(eval_bu(f))
 
     with ProcessPoolExecutor() as executor:
         # Collect dummiest values and x_labels using parallel execution
-        dummiest = list(executor.map(eval_dummiest, files))
+        # dummiest = list(executor.map(eval_dummiest, files))
 
         # Collect bilp values
-        bilp = list(executor.map(eval_bilp, files))
+        # bilp = list(executor.map(eval_bilp, files))
 
         # Collect bdd_bu values
         bdd_bu = list(executor.map(eval_bdd_bu, files))
 
         # Collect bdd_all_def values
-        bdd_all = list(executor.map(eval_bdd_all_def, files))
+        # bdd_all = list(executor.map(eval_bdd_all_def, files))
 
         # Collect bu values
         bu = list(executor.map(eval_bu, files))
@@ -127,4 +144,4 @@ if __name__ == "__main__":
         defense_count = len(T.get_basic_actions("d"))
         labels.append(f"{tree_size}({defense_count})")
 
-    save_results_to_csv(labels, dummiest, bilp, bdd_bu, bdd_all, bu)
+    save_results_to_csv(labels, dummiest, bilp, bdd_bu, bdd_all_def, bu, bdd_paths)

@@ -15,8 +15,7 @@ def create_tree(max_nodes):
     root = ET.Element("adtree")
     total_nodes = 0
 
-    filename = f"./data/random_trees/tree_{f"{max_nodes:02d}"} \
-        _{generate_random_string(length=5)}.xml"
+    filename = f"./data/random_trees/tree_{f"{max_nodes:02d}"}_{generate_random_string(length=5)}.xml"
     print(f"\n{filename}")
 
     def create_node(parent, is_counter=False, reserved=0):
@@ -59,8 +58,7 @@ def create_tree(max_nodes):
             )
 
             print(
-                f"{label.text}, max_nodes: {max_nodes}, current_nodes: {total_nodes}, \
-                    reserved: {reserved}, add_children: {children_count}",
+                f"{label.text}, max_nodes: {max_nodes}, current_nodes: {total_nodes}, reserved: {reserved}, add_children: {children_count}",
             )
 
             node.set("refinement", node_type)
@@ -128,7 +126,6 @@ def create_tree(max_nodes):
 
 
 if __name__ == "__main__":
-    for i in range(4, 40):
-        # Do each max_nodes 4 times
-        for _ in range(3):
+    for i in range(4, 50):
+        for _ in range(6):
             create_tree(max_nodes=i)

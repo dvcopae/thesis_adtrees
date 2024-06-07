@@ -56,17 +56,17 @@ def run_average(method, filepath, NO_RUNS=50):
 PRINT_PROGRESS = False
 
 if __name__ == "__main__":
-    for i in [9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 129]:
-        filepath = f"./data/trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 129]:
+    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average("bu", filepath, 100)
-        _, pf = run("bu", filepath)
-        print(pf)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average("bu", filepath, 100)
+    #     _, pf = run("bu", filepath)
+    #     print(pf)
 
-        print(f"Time: {time * 1000:.2f} ms.\n")
+    #     print(f"Time: {time * 1000:.2f} ms.\n")
 
-    # time, output = run("bu", "./data/trees_w_assignments/thesis_tree_modified.xml")
-    # print(output)
-    # print(f"Time: {time * 1000:.2f} ms.\n")
+    time, output = run("bu", "./data/random_trees/tree_990_29OlL.xml")
+    print(output)
+    print(f"Time: {time * 1000:.2f} ms.\n")

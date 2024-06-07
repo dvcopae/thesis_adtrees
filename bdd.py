@@ -269,21 +269,21 @@ PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    for i in [113, 121, 129]:
-        filepath = f"./data/trees_w_assignments/tree_{i}.xml"
-        print(os.path.basename(filepath))
+    # for i in [9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 129]:
+    #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
+    #     print(os.path.basename(filepath))
 
-        # Average time over `NO_RUNS`, excluding the time to read the tree
-        time = run_average(filepath, no_runs=1, method="all_paths")
-        _, pf = run(filepath)
-        print(pf)
+    #     # Average time over `NO_RUNS`, excluding the time to read the tree
+    #     time = run_average(filepath, no_runs=1, method="bu")
+    #     _, pf = run(filepath)
+    #     print(pf)
 
-        print(f"Time: {time * 1000:.2f} ms.\n")
+    #     print(f"Time: {time * 1000:.2f} ms.\n")
 
-    # time, output = run(
-    #     "./data/trees_w_assignments/counter_example_dag.xml",
-    #     method="bu",
-    #     dump=True,
-    # )
-    # print(output)
-    # print(f"Time: {time * 1000:.2f} ms.\n")
+    time, output = run(
+        "./data/random_trees/tree_400_hIdfp.xml",
+        method="bu",
+        dump=False,
+    )
+    print(output)
+    print(f"Time: {time * 1000:.2f} ms.\n")

@@ -168,8 +168,8 @@ def get_model(
 
     m.update()
 
-    # if dump:
-    m.write("model.lp")
+    if dump:
+        m.write("model.lp")
 
     return m, defense_cost, attack_cost
 
