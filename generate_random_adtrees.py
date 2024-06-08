@@ -126,6 +126,6 @@ def create_tree(max_nodes):
 
 
 if __name__ == "__main__":
-    for i in range(4, 50):
-        for _ in range(6):
+    for i in range(4, 45):
+        for _ in range(3):
             create_tree(max_nodes=i)

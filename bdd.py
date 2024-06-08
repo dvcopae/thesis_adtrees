@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-import os
+import re
 from timeit import default_timer as timer
 
 import dd.bdd as _bdd
@@ -197,7 +197,8 @@ def run_all_def(
         def_expr = boolean_expr
         def_dict = dict(zip(defenses, def_vector))
         for k, v in def_dict.items():
-            def_expr = def_expr.replace(str(k), str(bool(v)))
+            pattern = rf"\b{str(k)}(?=[\s()&|!])"  # string `k` followed by either whitespace,(,),&,|,!
+            def_expr = re.sub(pattern, str(bool(v)), def_expr)
 
         bdd = _bdd.BDD()
         bdd.declare(*attacks)
@@ -269,21 +270,21 @@ PRINT_PROGRESS = False
 
 if __name__ == "__main__":
     print("===== BDD =====\n")
-    # for i in [9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 129]:
+    # for i in [97, 105, 113, 121, 129]:
     #     filepath = f"./data/trees_w_assignments/tree_{i}.xml"
     #     print(os.path.basename(filepath))
 
     #     # Average time over `NO_RUNS`, excluding the time to read the tree
-    #     time = run_average(filepath, no_runs=1, method="bu")
+    #     time = run_average(filepath, no_runs=1, method="all_paths")
     #     _, pf = run(filepath)
     #     print(pf)
 
     #     print(f"Time: {time * 1000:.2f} ms.\n")
 
     time, output = run(
-        "./data/random_trees/tree_400_hIdfp.xml",
-        method="bu",
-        dump=False,
+        "./data/trees_w_assignments/counter_example_dag.xml",
+        method="all_def",
+        dump=True,
     )
     print(output)
     print(f"Time: {time * 1000:.2f} ms.\n")

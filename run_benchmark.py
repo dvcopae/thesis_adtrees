@@ -78,13 +78,14 @@ def eval_bdd_bu(file):
     return round(time * 1000, 2)
 
 
-def eval_bdd_all_paths(file):
+def eval_bdd_paths(file):
     time = run_bdd(file, 1, "all_paths")
     print(f"BDD-ALL-PATHS - finished {file}")
     return round(time * 1000, 2)
 
 
 def eval_bdd_all_def(file):
+    print(f"BDD-ALL-DEF - started {file}")
     time = run_bdd(file, 1, "all_def")
     print(f"BDD-ALL-DEF - finished {file}")
     return round(time * 1000, 2)
@@ -117,10 +118,7 @@ if __name__ == "__main__":
     bdd_paths = []
 
     # for f in files:
-    #     bdd_bu.append(eval_bdd_bu(f))
-
-    # for f in files:
-    #     bu.append(eval_bu(f))
+    #     bu.append(eval_bdd_all_def(f))
 
     with ProcessPoolExecutor() as executor:
         # Collect dummiest values and x_labels using parallel execution
@@ -130,13 +128,16 @@ if __name__ == "__main__":
         # bilp = list(executor.map(eval_bilp, files))
 
         # Collect bdd_bu values
-        bdd_bu = list(executor.map(eval_bdd_bu, files))
+        # bdd_bu = list(executor.map(eval_bdd_bu, files))
 
         # Collect bdd_all_def values
-        # bdd_all = list(executor.map(eval_bdd_all_def, files))
+        bdd_all_def = list(executor.map(eval_bdd_all_def, files))
 
         # Collect bu values
-        bu = list(executor.map(eval_bu, files))
+        # bu = list(executor.map(eval_bu, files))
+
+        # Collect bdd_paths values
+        bdd_paths = list(executor.map(eval_bdd_paths, files))
 
     for f in files:
         T = ADTree(f)
