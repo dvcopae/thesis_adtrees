@@ -1,3 +1,0 @@
-BDD_BU, BU: 300 x 2
-BDD_BU, BILP: 50 x 4
-BILP, BU: 50 x 4

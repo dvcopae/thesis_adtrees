@@ -49,6 +49,7 @@ def plot_results(
     plt.yscale("log")
     # plt.xlabel("Tree size(defenses)")
     plt.xticks(range(len(x_labels)), x_labels)
+    plt.grid(color="lightgray", linestyle="-", linewidth=0.05)
     plt.xticks(rotation=90)
     # plt.ylabel("Runtime (ms)")
 
@@ -73,7 +74,7 @@ def plot_results(
 
     plt.legend(loc="best")
     plt.tight_layout()
-    plt.savefig("benchmark.png")
+    plt.savefig("benchmark.pdf")
 
 
 if __name__ == "__main__":

@@ -25,16 +25,23 @@ def plot_results(labels, x, y, output, label_loc="lower right"):
 
     color_mapping = {
         0: "darkred",
-        # 1: "darkorange",
-        # 2: "yellow",
-        # 3: "darkgreen",
-        # 4: "darkcyan",
-        # 5: "darkblue",
-        # 6: "darkviolet",
+        1: "darkorange",
+        2: "yellow",
+        3: "darkgreen",
+        4: "darkcyan",
+        5: "darkblue",
+        6: "darkviolet",
     }
 
+    colors = [size_to_color(int(l.partition("(")[0])) for l in labels]
+
+    # Delete all the extra colors from the mapping
+    for k in list(color_mapping.keys()):
+        if k > max(colors):
+            del color_mapping[k]
+
     # Apply colors based on size categories
-    colors = [color_mapping[size_to_color(int(l.partition("(")[0]))] for l in labels]
+    colors = [color_mapping[c] for c in colors]
 
     lower_limit = 10**-6
     upper_limit = 10**4
@@ -70,7 +77,7 @@ def plot_results(labels, x, y, output, label_loc="lower right"):
     frame.set_alpha(1)  # deals with transparency
 
     plt.tight_layout()
-    plt.savefig(f"{output}.png")
+    plt.savefig(f"{output}.pdf")
     plt.clf()
 
 
@@ -83,20 +90,20 @@ if __name__ == "__main__":
         )  # get everything after the first _
         return output
 
-    # # BDD_BU <-> BILP
-    # FILENAME = "./benchmarking/algorithm_bdd-bu_bilp.csv"
-    # x_labels, _, bilp_values, bdd_bu_values, _, _, _ = read_results_from_csv(FILENAME)
-    # plot_results(x_labels, bdd_bu_values, bilp_values, get_plot_filename(FILENAME))
+    # BDD_BU <-> BILP
+    FILENAME = "./benchmarking/algorithm_bdd-bu_bilp.csv"
+    x_labels, _, bilp_values, bdd_bu_values, _, _, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bdd_bu_values, bilp_values, get_plot_filename(FILENAME))
 
-    # # BILP <-> BU
-    # FILENAME = "./benchmarking/algorithm_bu_bilp.csv"
-    # x_labels, _, bilp_values, _, _, bu_values, _ = read_results_from_csv(FILENAME)
-    # plot_results(x_labels, bu_values, bilp_values, get_plot_filename(FILENAME))
+    # BILP <-> BU
+    FILENAME = "./benchmarking/algorithm_bu_bilp.csv"
+    x_labels, _, bilp_values, _, _, bu_values, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bu_values, bilp_values, get_plot_filename(FILENAME))
 
     # BDD_BU <-> BU
-    # FILENAME = "./benchmarking/algorithm_bu_bdd-bu.csv"
-    # x_labels, _, _, bdd_bu_values, _, bu_values, _ = read_results_from_csv(FILENAME)
-    # plot_results(x_labels, bu_values, bdd_bu_values, get_plot_filename(FILENAME))
+    FILENAME = "./benchmarking/algorithm_bu_bdd-bu.csv"
+    x_labels, _, _, bdd_bu_values, _, bu_values, _ = read_results_from_csv(FILENAME)
+    plot_results(x_labels, bu_values, bdd_bu_values, get_plot_filename(FILENAME))
 
     ######## DUMMIEST ###########
 
@@ -136,27 +143,33 @@ if __name__ == "__main__":
     )
 
     ######## BDD ###########
-    # # BDD_BU <-> BDD_PATHS
-    # FILENAME = "./benchmarking/algorithm_bdd-bu_bdd-paths.csv"
-    # x_labels, _, _, bdd_bu_values, _, _, bdd_paths_values = read_results_from_csv(
-    #     FILENAME
-    # )
-    # plot_results(x_labels, bdd_bu_values, bdd_paths_values, get_plot_filename(FILENAME))
+    # BDD_BU <-> BDD_PATHS
+    FILENAME = "./benchmarking/algorithm_bdd-bu_bdd-paths.csv"
+    x_labels, _, _, bdd_bu_values, _, _, bdd_paths_values = read_results_from_csv(
+        FILENAME,
+    )
+    plot_results(x_labels, bdd_bu_values, bdd_paths_values, get_plot_filename(FILENAME))
 
     # BDD_BU <-> BDD_ALL_DEF
-    # FILENAME = "./benchmarking/algorithm_bdd-bu_bdd-all-def.csv"
-    # x_labels, _, _, bdd_bu_values, bdd_all_def_values, _, _ = read_results_from_csv(
-    #     FILENAME
-    # )
-    # plot_results(
-    #     x_labels, bdd_bu_values, bdd_all_def_values, get_plot_filename(FILENAME)
-    # )
+    FILENAME = "./benchmarking/algorithm_bdd-bu_bdd-all-def.csv"
+    x_labels, _, _, bdd_bu_values, bdd_all_def_values, _, _ = read_results_from_csv(
+        FILENAME,
+    )
+    plot_results(
+        x_labels,
+        bdd_bu_values,
+        bdd_all_def_values,
+        get_plot_filename(FILENAME),
+    )
 
-    # # BDD_PATHS <-> BDD_ALL_DEF
-    # FILENAME = "./benchmarking/algorithm_bdd-paths_bdd-all-def.csv"
-    # x_labels, _, _, _, bdd_all_def_values, _, bdd_paths_values = read_results_from_csv(
-    #     FILENAME
-    # )
-    # plot_results(
-    #     x_labels, bdd_paths_values, bdd_all_def_values, get_plot_filename(FILENAME)
-    # )
+    # BDD_PATHS <-> BDD_ALL_DEF
+    FILENAME = "./benchmarking/algorithm_bdd-paths_bdd-all-def.csv"
+    x_labels, _, _, _, bdd_all_def_values, _, bdd_paths_values = read_results_from_csv(
+        FILENAME,
+    )
+    plot_results(
+        x_labels,
+        bdd_paths_values,
+        bdd_all_def_values,
+        get_plot_filename(FILENAME),
+    )
