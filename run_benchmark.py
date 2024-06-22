@@ -132,13 +132,13 @@ if __name__ == "__main__":
         bdd_bu = list(executor.map(eval_bdd_bu, files))
 
         # Collect bdd_all_def values
-        # bdd_all_def = list(executor.map(eval_bdd_all_def, files))
+        bdd_all_def = list(executor.map(eval_bdd_all_def, files))
 
         # Collect bu values
-        bu = list(executor.map(eval_bu, files))
+        # bu = list(executor.map(eval_bu, files))
 
         # Collect bdd_paths values
-        # bdd_paths = list(executor.map(eval_bdd_paths, files))
+        bdd_paths = list(executor.map(eval_bdd_paths, files))
 
     for f in files:
         T = ADTree(f)

@@ -213,6 +213,8 @@ lower_limit = 10**-4.5
 upper_limit = 10**4
 plt.figure(figsize=(10, 6))
 plt.yscale("log")
+plt.xlabel("Tree size")
+plt.ylabel("Time (s)")
 # plt.xscale("log", base=2)
 plt.grid(color="lightgray", linestyle="-", linewidth=0.05)
 plt.ylim(lower_limit, upper_limit)

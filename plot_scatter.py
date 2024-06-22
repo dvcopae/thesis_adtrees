@@ -20,6 +20,8 @@ def plot_results(labels, x, y, output, label_loc="lower right"):
     y = [v / 1000 for v in y]
 
     plt.figure(figsize=(4, 3))
+    plt.xlabel("Time (s)")
+    plt.ylabel("Time (s)")
     plt.yscale("log")
     plt.xscale("log")
 

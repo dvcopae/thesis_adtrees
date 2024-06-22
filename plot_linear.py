@@ -47,11 +47,11 @@ def plot_results(
     plt.figure(figsize=(10, 6))
 
     plt.yscale("log")
-    # plt.xlabel("Tree size(defenses)")
+    plt.xlabel("Tree size(defenses)")
     plt.xticks(range(len(x_labels)), x_labels)
     plt.grid(color="lightgray", linestyle="-", linewidth=0.05)
     plt.xticks(rotation=90)
-    # plt.ylabel("Runtime (ms)")
+    plt.ylabel("Time (s)")
 
     # Transform from ms to s
     dummiest_values = [v / 1000 for v in dummiest_values]
